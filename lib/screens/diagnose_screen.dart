@@ -291,13 +291,13 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: _focus.hasFocus
-              ? AppColors.accent.withOpacity(0.6)
+              ? AppColors.accent.withValues(alpha: 0.6)
               : AppColors.surfaceAlt,
           width: 1.5,
         ),
         boxShadow: _focus.hasFocus
             ? [BoxShadow(
-                color: AppColors.accent.withOpacity(0.08),
+                color: AppColors.accent.withValues(alpha: 0.08),
                 blurRadius: 20,
               )]
             : null,
@@ -370,7 +370,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
             borderRadius: BorderRadius.circular(16),
             boxShadow: canSubmit
                 ? [BoxShadow(
-                    color: AppColors.accent.withOpacity(0.4),
+                    color: AppColors.accent.withValues(alpha: 0.4),
                     blurRadius: 22,
                     offset: const Offset(0, 6),
                   )]
@@ -414,10 +414,10 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFF3B30).withOpacity(0.1),
+        color: const Color(0xFFFF3B30).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: const Color(0xFFFF3B30).withOpacity(0.3)),
+            color: const Color(0xFFFF3B30).withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -480,13 +480,13 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                 borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
                   colors: [
-                    grad[0].withOpacity(0.18),
-                    grad[1].withOpacity(0.08),
+                    grad[0].withValues(alpha: 0.18),
+                    grad[1].withValues(alpha: 0.08),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(color: grad[0].withOpacity(0.35), width: 1.2),
+                border: Border.all(color: grad[0].withValues(alpha: 0.35), width: 1.2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,8 +498,8 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          grad[0].withOpacity(0.3),
-                          grad[1].withOpacity(0.15),
+                          grad[0].withValues(alpha: 0.3),
+                          grad[1].withValues(alpha: 0.15),
                         ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
@@ -531,7 +531,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                     height: 1,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [grad[0].withOpacity(0.5), Colors.transparent],
+                        colors: [grad[0].withValues(alpha: 0.5), Colors.transparent],
                       ),
                     ),
                   ),
@@ -641,9 +641,9 @@ class _SourceBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.35)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -676,14 +676,14 @@ class _KeywordChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Text(
         keyword,
         style: TextStyle(
-          color: color.withOpacity(0.9), fontSize: 11, fontWeight: FontWeight.w500,
+          color: color.withValues(alpha: 0.9), fontSize: 11, fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -833,7 +833,7 @@ class _Background extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(-0.8, -0.9),
           radius: 1.4,
-          colors: [c1.withOpacity(0.12), AppColors.bg],
+          colors: [c1.withValues(alpha: 0.12), AppColors.bg],
         ),
       ),
       child: CustomPaint(
@@ -843,7 +843,7 @@ class _Background extends StatelessWidget {
             gradient: RadialGradient(
               center: const Alignment(0.9, 0.8),
               radius: 1.0,
-              colors: [c2.withOpacity(0.07), Colors.transparent],
+              colors: [c2.withValues(alpha: 0.07), Colors.transparent],
             ),
           ),
         ),
@@ -856,7 +856,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.025)
+      ..color = Colors.white.withValues(alpha: 0.025)
       ..strokeWidth = 0.5;
     const spacing = 40.0;
     for (double x = 0; x < size.width; x += spacing) {

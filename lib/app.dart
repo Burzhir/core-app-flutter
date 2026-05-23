@@ -5,9 +5,11 @@ import 'screens/diagnose_screen.dart';
 import 'screens/philosophies_screen.dart';
 import 'screens/journal_screen.dart';
 import 'screens/profile_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 
 class CoreApp extends StatelessWidget {
-  const CoreApp({super.key});
+  final bool showOnboarding;
+  const CoreApp({super.key, this.showOnboarding = false});
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +21,12 @@ class CoreApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.bg,
         useMaterial3: true,
       ),
-      home: const MainShell(),
+      home: showOnboarding ? const OnboardingScreen() : const MainShell(),
     );
   }
 }
 
 // ── Main shell ─────────────────────────────────────────────────────────────────
-// Uses IndexedStack so switching tabs NEVER destroys screen state.
-// DiagnoseScreen history, scroll position, etc. all survive tab switches.
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});

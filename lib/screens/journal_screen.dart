@@ -199,7 +199,7 @@ class _JournalScreenState extends State<JournalScreen> {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: const Color(0xFF64D2FF).withOpacity(0.5), width: 1.5),
+            color: const Color(0xFF64D2FF).withValues(alpha: 0.5), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,7 +415,7 @@ class _JournalTile extends StatelessWidget {
         padding: const EdgeInsets.only(right: 20),
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF3B30).withOpacity(0.15),
+          color: const Color(0xFFFF3B30).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(14),
         ),
         child: const Icon(Icons.delete_outline_rounded,

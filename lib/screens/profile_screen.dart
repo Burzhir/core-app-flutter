@@ -38,8 +38,8 @@ class ProfileScreen extends StatelessWidget {
                   const SnackBar(content: Text('All data cleared')),
                 );
               },
-              child: const Text('Clear All Data'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              child: const Text('Clear All Data'),
             ),
           ],
         ),

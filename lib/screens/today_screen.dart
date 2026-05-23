@@ -62,7 +62,7 @@ class TodayScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        gradColors[0].withOpacity(0.15),
+                        gradColors[0].withValues(alpha: 0.15),
                         Colors.transparent,
                       ],
                     ),
@@ -134,10 +134,10 @@ class TodayScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF9500).withOpacity(0.15),
+                  color: const Color(0xFFFF9500).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: const Color(0xFFFF9500).withOpacity(0.35)),
+                      color: const Color(0xFFFF9500).withValues(alpha: 0.35)),
                 ),
                 child: Row(
                   children: [
@@ -175,14 +175,14 @@ class TodayScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           gradient: LinearGradient(
             colors: [
-              gradColors[0].withOpacity(0.25),
-              gradColors[1].withOpacity(0.12),
+              gradColors[0].withValues(alpha: 0.25),
+              gradColors[1].withValues(alpha: 0.12),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           border: Border.all(
-              color: gradColors[0].withOpacity(0.4), width: 1.2),
+              color: gradColors[0].withValues(alpha: 0.4), width: 1.2),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +196,7 @@ class TodayScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: gradColors[0].withOpacity(0.2),
+                      color: gradColors[0].withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -211,7 +211,7 @@ class TodayScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   Icon(Icons.chevron_right_rounded,
-                      color: gradColors[0].withOpacity(0.6), size: 18),
+                      color: gradColors[0].withValues(alpha: 0.6), size: 18),
                 ],
               ),
             ),
@@ -259,7 +259,7 @@ class TodayScreen extends StatelessWidget {
               child: Text(
                 philosophy.tagline,
                 style: TextStyle(
-                  color: AppColors.textSecondary.withOpacity(0.9),
+                  color: AppColors.textSecondary.withValues(alpha: 0.9),
                   fontSize: 14,
                   fontStyle: FontStyle.italic,
                   height: 1.5,
@@ -475,7 +475,7 @@ class _StatTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
@@ -566,7 +566,7 @@ class _PhilosophyDetailSheet extends StatelessWidget {
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [gradColors[0].withOpacity(0.5), Colors.transparent],
+                colors: [gradColors[0].withValues(alpha: 0.5), Colors.transparent],
               ),
             ),
           ),
@@ -583,9 +583,9 @@ class _PhilosophyDetailSheet extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: gradColors[0].withOpacity(0.1),
+              color: gradColors[0].withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: gradColors[0].withOpacity(0.3)),
+              border: Border.all(color: gradColors[0].withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

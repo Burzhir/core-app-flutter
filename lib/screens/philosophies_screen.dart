@@ -215,12 +215,12 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      colors[0].withOpacity(0.2),
-                      colors[1].withOpacity(0.1),
+                      colors[0].withValues(alpha: 0.2),
+                      colors[1].withValues(alpha: 0.1),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: colors[0].withOpacity(0.35)),
+                  border: Border.all(color: colors[0].withValues(alpha: 0.35)),
                 ),
                 child: Row(
                   children: [
@@ -290,15 +290,15 @@ class _PhilosophyCard extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              gradColors[0].withOpacity(isMatched ? 0.22 : 0.12),
-              gradColors[1].withOpacity(isMatched ? 0.12 : 0.06),
+              gradColors[0].withValues(alpha: isMatched ? 0.22 : 0.12),
+              gradColors[1].withValues(alpha: isMatched ? 0.12 : 0.06),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: gradColors[0].withOpacity(isMatched ? 0.5 : 0.25),
+            color: gradColors[0].withValues(alpha: isMatched ? 0.5 : 0.25),
             width: isMatched ? 1.5 : 1,
           ),
         ),
@@ -317,11 +317,11 @@ class _PhilosophyCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
-                      color: gradColors[0].withOpacity(0.2),
+                      color: gradColors[0].withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      '${matchCount}×',
+                      '$matchCount×',
                       style: TextStyle(
                         color: gradColors[0],
                         fontSize: 10,
@@ -361,7 +361,7 @@ class _PhilosophyCard extends StatelessWidget {
             Text(
               philosophy.tagline,
               style: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.8),
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
                 height: 1.4,
@@ -460,7 +460,7 @@ class _PhilosophyDetailSheet extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  gradColors[0].withOpacity(0.6),
+                  gradColors[0].withValues(alpha: 0.6),
                   Colors.transparent,
                 ],
               ),
@@ -498,13 +498,13 @@ class _PhilosophyDetailSheet extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  gradColors[0].withOpacity(0.15),
-                  gradColors[1].withOpacity(0.08),
+                  gradColors[0].withValues(alpha: 0.15),
+                  gradColors[1].withValues(alpha: 0.08),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                  color: gradColors[0].withOpacity(0.35), width: 1.2),
+                  color: gradColors[0].withValues(alpha: 0.35), width: 1.2),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
