@@ -174,12 +174,12 @@ class _JournalScreenState extends State<JournalScreen> {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.surfaceAlt),
         ),
-        child: Row(
+        child: const Row(
           children: [
-            const Icon(Icons.edit_outlined,
+            Icon(Icons.edit_outlined,
                 color: AppColors.textMuted, size: 16),
-            const SizedBox(width: 10),
-            const Text(
+            SizedBox(width: 10),
+            Text(
               'Write a reflection…',
               style: TextStyle(color: AppColors.textMuted, fontSize: 14),
             ),

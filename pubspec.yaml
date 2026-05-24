@@ -18,7 +18,24 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Outfit-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Outfit-Black.ttf
+          weight: 900
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/noto/NotoSans-Regular.ttf

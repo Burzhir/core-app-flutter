@@ -322,7 +322,7 @@ class TodayScreen extends StatelessWidget {
 
   Widget _buildLastDiagnosisCard(AppState state, List<Color> gradColors) {
     final last = state.lastDiagnosis!;
-    final lastColors = last.result.gradientColors;
+    // final lastColors = last.result.gradientColors;  //
     final diff = DateTime.now().difference(last.timestamp);
     final timeAgo = diff.inMinutes < 60
         ? '${diff.inMinutes}m ago'

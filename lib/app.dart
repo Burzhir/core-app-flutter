@@ -20,6 +20,7 @@ class CoreApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AppColors.bg,
         useMaterial3: true,
+        fontFamily: 'Outfit',
       ),
       home: showOnboarding ? const OnboardingScreen() : const MainShell(),
     );

@@ -254,10 +254,10 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
   // ── Headline ───────────────────────────────────────────────────────────────
 
   Widget _buildHeadline() {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "What's in\nyour way?",
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -267,8 +267,8 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 10),
-        const Text(
+         SizedBox(height: 10),
+         Text(
           'No therapy. No hand-holding. Just the philosophy you need to move.',
           style: TextStyle(
             color: AppColors.textSecondary,
