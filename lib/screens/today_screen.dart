@@ -43,7 +43,7 @@ class TodayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final philosophy = _dailyPhilosophy;
-    final gradColors = AppColors.gradientFor(philosophy.name);
+    final gradColors = philosophy.gradientColors;
 
     return Consumer<AppState>(
       builder: (context, state, _) {
