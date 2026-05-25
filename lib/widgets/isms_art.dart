@@ -1,12 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../data/philosophies_data.dart';
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// PhilosophyArt — generates unique abstract art for each philosophy
-// using CustomPainter. Zero external assets needed.
-// Each category has a distinct visual language. Each ID produces a unique variant.
-// ═══════════════════════════════════════════════════════════════════════════════
+import '../data/isms_data.dart';
 
 /// Deterministic "random" from a string seed.
 class _Seeded {
@@ -24,18 +18,17 @@ class _Seeded {
   int nextInt(int max) => (next() * max).floor();
 }
 
-// ── Public widget ──────────────────────────────────────────────────────────────
-
-class PhilosophyArtWidget extends StatefulWidget {
-  final PhilosophyMeta philosophy;
+// ── Public widget ──────────────────────────────────────────────────────────
+class IsmArtWidget extends StatefulWidget {
+  final IsmMeta ism;
   final List<Color> colors;
   final double height;
-  final double? width;                     // ✅ optional width, defaults to double.infinity
+  final double? width;
   final bool animated;
 
-  const PhilosophyArtWidget({
+  const IsmArtWidget({
     super.key,
-    required this.philosophy,
+    required this.ism,
     required this.colors,
     this.height = 280,
     this.width,
@@ -43,10 +36,10 @@ class PhilosophyArtWidget extends StatefulWidget {
   });
 
   @override
-  State<PhilosophyArtWidget> createState() => _PhilosophyArtWidgetState();
+  State<IsmArtWidget> createState() => _IsmArtWidgetState();
 }
 
-class _PhilosophyArtWidgetState extends State<PhilosophyArtWidget>
+class _IsmArtWidgetState extends State<IsmArtWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _anim;
@@ -54,10 +47,7 @@ class _PhilosophyArtWidgetState extends State<PhilosophyArtWidget>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 12),
-    );
+    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 12));
     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.linear);
     if (widget.animated) _ctrl.repeat();
   }
@@ -71,13 +61,14 @@ class _PhilosophyArtWidgetState extends State<PhilosophyArtWidget>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.width ?? double.infinity,   // ✅ use optional width
+      width: widget.width ?? double.infinity,
       height: widget.height,
-      child: AnimatedBuilder(                   // ✅ fixed typo (was AnimatedBuilder)
+      child: AnimatedBuilder(
         animation: _anim,
         builder: (_, __) => CustomPaint(
           painter: _ArtPainter(
-            philosophy: widget.philosophy,
+            visualStyle: widget.ism.visualStyle,
+            seed: widget.ism.id,
             colors: widget.colors,
             t: _anim.value,
           ),
@@ -87,69 +78,53 @@ class _PhilosophyArtWidgetState extends State<PhilosophyArtWidget>
   }
 }
 
-// ── Master painter dispatcher ──────────────────────────────────────────────────
-
+// ── Master painter ─────────────────────────────────────────────────────────
 class _ArtPainter extends CustomPainter {
-  final PhilosophyMeta philosophy;
+  final ArtStyle visualStyle;
+  final String seed;
   final List<Color> colors;
-  final double t; // 0..1 animation time
+  final double t;
 
   _ArtPainter({
-    required this.philosophy,
+    required this.visualStyle,
+    required this.seed,
     required this.colors,
     required this.t,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw dark background
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
       Paint()..color = const Color(0xFF080612),
     );
 
-    switch (philosophy.category) {
-      case PhilosophyCategory.discipline:
-        _paintDiscipline(canvas, size);
-        break;
-      case PhilosophyCategory.creativity:
-        _paintCreativity(canvas, size);
-        break;
-      case PhilosophyCategory.mindfulness:
-        _paintMindfulness(canvas, size);
-        break;
-      case PhilosophyCategory.reason:
-        _paintReason(canvas, size);
-        break;
-      case PhilosophyCategory.existential:
-        _paintExistential(canvas, size);
-        break;
-      case PhilosophyCategory.relations:
-        _paintRelations(canvas, size);
-        break;
+    switch (visualStyle) {
+      case ArtStyle.discipline: _paintDiscipline(canvas, size); break;
+      case ArtStyle.creativity: _paintCreativity(canvas, size); break;
+      case ArtStyle.mindfulness: _paintMindfulness(canvas, size); break;
+      case ArtStyle.reason: _paintReason(canvas, size); break;
+      case ArtStyle.existential: _paintExistential(canvas, size); break;
+      case ArtStyle.relations: _paintRelations(canvas, size); break;
     }
 
-    // Vignette overlay for depth
     _paintVignette(canvas, size);
   }
 
-  // ── DISCIPLINE — Geometric grid + diagonal beams ─────────────────────────
-
+  // ── DISCIPLINE ───────────────────────────────────────────────────────────
   void _paintDiscipline(Canvas canvas, Size size) {
-    final rng = _Seeded(philosophy.id);
+    final rng = _Seeded(seed);
     final c1 = colors[0];
     final c2 = colors[1];
     final cx = size.width / 2;
     final cy = size.height / 2;
 
-    // Background gradient orb
     final bgPaint = Paint()
       ..shader = RadialGradient(
         colors: [c1.withValues(alpha: 0.25), Colors.transparent],
       ).createShader(Rect.fromCircle(center: Offset(cx * 0.3, cy * 0.4), radius: size.width * 0.6));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
 
-    // Vertical pillars (marble-column feel)
     final pillars = 5 + rng.nextInt(3);
     for (int i = 0; i < pillars; i++) {
       final x = size.width * (i + 1) / (pillars + 1);
@@ -171,7 +146,6 @@ class _ArtPainter extends CustomPainter {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
 
-    // Horizontal scan lines
     final lines = 8 + rng.nextInt(6);
     for (int i = 0; i < lines; i++) {
       final y = size.height * (i + 1) / (lines + 1);
@@ -182,7 +156,6 @@ class _ArtPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
 
-    // Diagonal beam
     final beamAngle = rng.range(-math.pi / 6, math.pi / 6);
     final beamX = cx + math.cos(beamAngle + t * math.pi * 0.2) * size.width * 0.3;
     final beamPaint = Paint()
@@ -200,7 +173,6 @@ class _ArtPainter extends CustomPainter {
     );
     canvas.restore();
 
-    // Central geometric shape (column capital / shield)
     _paintCentralGeometry(canvas, size, c1, c2, rng, t);
   }
 
@@ -208,7 +180,7 @@ class _ArtPainter extends CustomPainter {
     final cx = size.width / 2;
     final cy = size.height * 0.45;
     final r = size.width * 0.18;
-    final sides = 3 + rng.nextInt(3) * 2; // 3, 5, or 7
+    final sides = 3 + rng.nextInt(3) * 2;
     final rot = t * math.pi * 0.4;
 
     final path = Path();
@@ -224,22 +196,14 @@ class _ArtPainter extends CustomPainter {
     }
     path.close();
 
-    // Outer glow
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = c1.withValues(alpha: 0.08)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24),
-    );
-    // Stroke
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = c1.withValues(alpha: 0.5)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
-    // Inner smaller shape, counter-rotating
+    canvas.drawPath(path, Paint()
+      ..color = c1.withValues(alpha: 0.08)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24));
+    canvas.drawPath(path, Paint()
+      ..color = c1.withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5);
+
     final innerPath = Path();
     for (int i = 0; i < sides; i++) {
       final angle = -rot * 1.5 + (2 * math.pi * i / sides) - math.pi / 2;
@@ -252,23 +216,18 @@ class _ArtPainter extends CustomPainter {
       }
     }
     innerPath.close();
-    canvas.drawPath(
-      innerPath,
-      Paint()
-        ..color = c2.withValues(alpha: 0.4)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
-    );
+    canvas.drawPath(innerPath, Paint()
+      ..color = c2.withValues(alpha: 0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0);
   }
 
-  // ── CREATIVITY — Organic paint strokes + color bursts ─────────────────────
-
+  // ── CREATIVITY ───────────────────────────────────────────────────────────
   void _paintCreativity(Canvas canvas, Size size) {
-    final rng = _Seeded(philosophy.id);
+    final rng = _Seeded(seed);
     final c1 = colors[0];
     final c2 = colors[1];
 
-    // Swirling bezier strokes
     final strokeCount = 12 + rng.nextInt(8);
     for (int i = 0; i < strokeCount; i++) {
       final startX = rng.range(0, size.width);
@@ -287,18 +246,13 @@ class _ArtPainter extends CustomPainter {
       final path = Path()
         ..moveTo(startX, startY)
         ..cubicTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = color.withValues(alpha: opacity.clamp(0, 0.3))
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = rng.range(1.0, 4.0)
-          ..strokeCap = StrokeCap.round,
-      );
+      canvas.drawPath(path, Paint()
+        ..color = color.withValues(alpha: opacity.clamp(0, 0.3))
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = rng.range(1.0, 4.0)
+        ..strokeCap = StrokeCap.round);
     }
 
-    // Color burst circles
     final burstCount = 5 + rng.nextInt(4);
     for (int i = 0; i < burstCount; i++) {
       final bx = rng.range(size.width * 0.1, size.width * 0.9);
@@ -306,18 +260,12 @@ class _ArtPainter extends CustomPainter {
       final phase = t * 2 * math.pi + i * 1.3;
       final br = size.width * rng.range(0.04, 0.14) * (0.8 + math.sin(phase) * 0.2);
       final color = Color.lerp(c1, c2, rng.next())!;
-
-      canvas.drawCircle(
-        Offset(bx, by),
-        br,
-        Paint()
-          ..shader = RadialGradient(
-            colors: [color.withValues(alpha: 0.3), Colors.transparent],
-          ).createShader(Rect.fromCircle(center: Offset(bx, by), radius: br)),
-      );
+      canvas.drawCircle(Offset(bx, by), br, Paint()
+        ..shader = RadialGradient(
+          colors: [color.withValues(alpha: 0.3), Colors.transparent],
+        ).createShader(Rect.fromCircle(center: Offset(bx, by), radius: br)));
     }
 
-    // Central splatter — small high-opacity dots
     final dotCount = 40 + rng.nextInt(30);
     for (int i = 0; i < dotCount; i++) {
       final r = rng.range(0, size.width * 0.28);
@@ -326,25 +274,18 @@ class _ArtPainter extends CustomPainter {
       final dy = size.height * 0.5 + r * math.sin(angle);
       final ds = rng.range(1.0, 4.0);
       final color = Color.lerp(c1, c2, rng.next())!;
-
-      canvas.drawCircle(
-        Offset(dx, dy),
-        ds,
-        Paint()..color = color.withValues(alpha: rng.range(0.15, 0.5)),
-      );
+      canvas.drawCircle(Offset(dx, dy), ds, Paint()..color = color.withValues(alpha: rng.range(0.15, 0.5)));
     }
   }
 
-  // ── MINDFULNESS — Concentric ripples + zen geometry ───────────────────────
-
+  // ── MINDFULNESS ──────────────────────────────────────────────────────────
   void _paintMindfulness(Canvas canvas, Size size) {
-    final rng = _Seeded(philosophy.id);
+    final rng = _Seeded(seed);
     final c1 = colors[0];
     final c2 = colors[1];
     final cx = size.width * rng.range(0.35, 0.65);
     final cy = size.height * rng.range(0.3, 0.55);
 
-    // Concentric circles — ripple outward
     final ringCount = 10 + rng.nextInt(8);
     for (int i = 0; i < ringCount; i++) {
       final frac = i / ringCount;
@@ -353,28 +294,17 @@ class _ArtPainter extends CustomPainter {
       final radius = r * size.width * 0.75;
       final opacity = (1.0 - r) * 0.18;
       final color = Color.lerp(c1, c2, frac)!;
-
-      canvas.drawCircle(
-        Offset(cx, cy),
-        radius,
-        Paint()
-          ..color = color.withValues(alpha: opacity)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8 + (1.0 - frac) * 1.2,
-      );
+      canvas.drawCircle(Offset(cx, cy), radius, Paint()
+        ..color = color.withValues(alpha: opacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8 + (1.0 - frac) * 1.2);
     }
 
-    // Soft inner glow
-    canvas.drawCircle(
-      Offset(cx, cy),
-      size.width * 0.12,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [c1.withValues(alpha: 0.35), Colors.transparent],
-        ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: size.width * 0.12)),
-    );
+    canvas.drawCircle(Offset(cx, cy), size.width * 0.12, Paint()
+      ..shader = RadialGradient(
+        colors: [c1.withValues(alpha: 0.35), Colors.transparent],
+      ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: size.width * 0.12)));
 
-    // Floating particles drifting outward
     final particleCount = 20 + rng.nextInt(15);
     for (int i = 0; i < particleCount; i++) {
       final angle = rng.range(0, 2 * math.pi);
@@ -384,15 +314,9 @@ class _ArtPainter extends CustomPainter {
       final py = cy + r * math.sin(angle);
       final pr = rng.range(1.0, 3.0);
       final opacity = (1.0 - r / (size.width * 0.5)) * 0.5;
-
-      canvas.drawCircle(
-        Offset(px, py),
-        pr,
-        Paint()..color = c1.withValues(alpha: opacity.clamp(0, 0.5)),
-      );
+      canvas.drawCircle(Offset(px, py), pr, Paint()..color = c1.withValues(alpha: opacity.clamp(0, 0.5)));
     }
 
-    // Wave lines below center
     for (int w = 0; w < 5; w++) {
       final y0 = cy + size.height * (0.15 + w * 0.07);
       final path = Path();
@@ -401,41 +325,30 @@ class _ArtPainter extends CustomPainter {
         final wave = math.sin(x / size.width * math.pi * 4 + t * 2 * math.pi + w * 0.7);
         path.lineTo(x, y0 + wave * 6 * (1 - w * 0.15));
       }
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = c2.withValues(alpha: 0.08 + w * 0.01)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8,
-      );
+      canvas.drawPath(path, Paint()
+        ..color = c2.withValues(alpha: 0.08 + w * 0.01)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8);
     }
   }
 
-  // ── REASON — Mathematical grid + golden spiral ────────────────────────────
-
+  // ── REASON ───────────────────────────────────────────────────────────────
   void _paintReason(Canvas canvas, Size size) {
-    final rng = _Seeded(philosophy.id);
+    // ignore: unused_local_variable
+    final rng = _Seeded(seed);
     final c1 = colors[0];
     final c2 = colors[1];
     final cx = size.width / 2;
     final cy = size.height / 2;
 
-    // Fine grid
     const spacing = 28.0;
     for (double x = 0; x < size.width; x += spacing) {
-      canvas.drawLine(
-        Offset(x, 0), Offset(x, size.height),
-        Paint()..color = c1.withValues(alpha: 0.04)..strokeWidth = 0.5,
-      );
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), Paint()..color = c1.withValues(alpha: 0.04)..strokeWidth = 0.5);
     }
     for (double y = 0; y < size.height; y += spacing) {
-      canvas.drawLine(
-        Offset(0, y), Offset(size.width, y),
-        Paint()..color = c1.withValues(alpha: 0.04)..strokeWidth = 0.5,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), Paint()..color = c1.withValues(alpha: 0.04)..strokeWidth = 0.5);
     }
 
-    // Golden spiral
     final spiralPath = Path();
     var spiralX = cx, spiralY = cy;
     var r = 2.0;
@@ -447,154 +360,97 @@ class _ArtPainter extends CustomPainter {
       spiralY = cy + r * math.sin(animAngle);
       spiralPath.lineTo(spiralX, spiralY);
       r *= 1.0 + phiRecip * 0.08;
-      if (r > size.width * 0.55) {
-        break;
-      }
+      if (r > size.width * 0.55) break;
     }
-    canvas.drawPath(
-      spiralPath,
-      Paint()
-        ..color = c1.withValues(alpha: 0.25)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2
-        ..strokeCap = StrokeCap.round,
-    );
+    canvas.drawPath(spiralPath, Paint()
+      ..color = c1.withValues(alpha: 0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round);
 
-    // Intersection dots at grid crossings near center
     for (double x = cx - spacing * 4; x < cx + spacing * 5; x += spacing) {
       for (double y = cy - spacing * 3; y < cy + spacing * 4; y += spacing) {
         final dist = math.sqrt(math.pow(x - cx, 2) + math.pow(y - cy, 2));
         final opacity = (1.0 - dist / (size.width * 0.6)).clamp(0.0, 1.0) * 0.35;
-        canvas.drawCircle(
-          Offset(x, y),
-          1.2,
-          Paint()..color = c2.withValues(alpha: opacity),
-        );
+        canvas.drawCircle(Offset(x, y), 1.2, Paint()..color = c2.withValues(alpha: opacity));
       }
     }
 
-    // Data-scan pulse ring
     final pulseFrac = (t * 1.5) % 1.0;
     final pulseR = pulseFrac * size.width * 0.45;
-    canvas.drawCircle(
-      Offset(cx, cy),
-      pulseR,
-      Paint()
-        ..color = c1.withValues(alpha: (1.0 - pulseFrac) * 0.2)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
-    );
+    canvas.drawCircle(Offset(cx, cy), pulseR, Paint()
+      ..color = c1.withValues(alpha: (1.0 - pulseFrac) * 0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0);
   }
 
-  // ── EXISTENTIAL — Void + single light source ──────────────────────────────
-
+  // ── EXISTENTIAL ──────────────────────────────────────────────────────────
   void _paintExistential(Canvas canvas, Size size) {
-    final rng = _Seeded(philosophy.id);   // used throughout, ignore the analyzer warning about unused variable
+    final rng = _Seeded(seed);
     final c1 = colors[0];
     final c2 = colors[1];
 
-    // Deep void — near-black gradient
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()
-        ..shader = const RadialGradient(
-          center: Alignment(0, -0.4),
-          radius: 1.2,
-          colors: [ Color(0xFF0A0518),  Color(0xFF030108)],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()
+      ..shader = const RadialGradient(
+        center: Alignment(0, -0.4), radius: 1.2,
+        colors: [Color(0xFF0A0518), Color(0xFF030108)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)));
 
-    // Star field
     final starCount = 60 + rng.nextInt(40);
     for (int i = 0; i < starCount; i++) {
       final sx = rng.range(0, size.width);
       final sy = rng.range(0, size.height);
       final sr = rng.range(0.4, 1.8);
       final twinkle = math.sin(t * 2 * math.pi * rng.range(0.3, 1.5) + i) * 0.5 + 0.5;
-      canvas.drawCircle(
-        Offset(sx, sy),
-        sr,
-        Paint()..color = Colors.white.withValues(alpha: twinkle * 0.6 + 0.1),
-      );
+      canvas.drawCircle(Offset(sx, sy), sr, Paint()..color = Colors.white.withValues(alpha: twinkle * 0.6 + 0.1));
     }
 
-    // Pale Blue Dot — a single small bright orb
     final dotX = size.width * rng.range(0.3, 0.7);
     final dotY = size.height * rng.range(0.25, 0.55);
     final dotPulse = math.sin(t * 2 * math.pi * 0.4) * 0.5 + 0.5;
 
-    // Outer corona
-    canvas.drawCircle(
-      Offset(dotX, dotY),
-      size.width * 0.09,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [c1.withValues(alpha: 0.25 + dotPulse * 0.15), Colors.transparent],
-        ).createShader(Rect.fromCircle(
-          center: Offset(dotX, dotY), radius: size.width * 0.09)),
-    );
-    // Inner glow
-    canvas.drawCircle(
-      Offset(dotX, dotY),
-      size.width * 0.025,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [Colors.white.withValues(alpha: 0.9), c1.withValues(alpha: 0.5), Colors.transparent],
-        ).createShader(Rect.fromCircle(
-          center: Offset(dotX, dotY), radius: size.width * 0.025)),
-    );
+    canvas.drawCircle(Offset(dotX, dotY), size.width * 0.09, Paint()
+      ..shader = RadialGradient(
+        colors: [c1.withValues(alpha: 0.25 + dotPulse * 0.15), Colors.transparent],
+      ).createShader(Rect.fromCircle(center: Offset(dotX, dotY), radius: size.width * 0.09)));
+    canvas.drawCircle(Offset(dotX, dotY), size.width * 0.025, Paint()
+      ..shader = RadialGradient(
+        colors: [Colors.white.withValues(alpha: 0.9), c1.withValues(alpha: 0.5), Colors.transparent],
+      ).createShader(Rect.fromCircle(center: Offset(dotX, dotY), radius: size.width * 0.025)));
 
-    // Light ray from dot
     for (int ray = 0; ray < 6; ray++) {
       final angle = t * math.pi * 0.3 + ray * math.pi / 3;
       final len = size.width * rng.range(0.1, 0.3);
-      canvas.drawLine(
-        Offset(dotX, dotY),
-        Offset(dotX + len * math.cos(angle), dotY + len * math.sin(angle)),
-        Paint()
-          ..color = c1.withValues(alpha: 0.06 + dotPulse * 0.04)
-          ..strokeWidth = 0.6,
-      );
+      canvas.drawLine(Offset(dotX, dotY), Offset(dotX + len * math.cos(angle), dotY + len * math.sin(angle)),
+        Paint()..color = c1.withValues(alpha: 0.06 + dotPulse * 0.04)..strokeWidth = 0.6);
     }
 
-    // Distant galaxy smear
     final smearX = size.width * rng.range(0.1, 0.4);
     final smearY = size.height * rng.range(0.1, 0.4);
     canvas.save();
     canvas.translate(smearX, smearY);
     canvas.rotate(rng.range(-0.5, 0.5));
     canvas.drawOval(
-      Rect.fromCenter(center: Offset.zero,
-          width: size.width * rng.range(0.12, 0.22),
-          height: size.height * rng.range(0.03, 0.07)),
-      Paint()
-        ..shader = RadialGradient(
-          colors: [c2.withValues(alpha: 0.18), Colors.transparent],
-        ).createShader(Rect.fromCenter(center: Offset.zero,
-          width: size.width * 0.2, height: size.height * 0.06)),
-    );
+      Rect.fromCenter(center: Offset.zero, width: size.width * rng.range(0.12, 0.22), height: size.height * rng.range(0.03, 0.07)),
+      Paint()..shader = RadialGradient(
+        colors: [c2.withValues(alpha: 0.18), Colors.transparent],
+      ).createShader(Rect.fromCenter(center: Offset.zero, width: size.width * 0.2, height: size.height * 0.06)));
     canvas.restore();
   }
 
-  // ── RELATIONS — Interconnected nodes + flowing threads ───────────────────
-
+  // ── RELATIONS ────────────────────────────────────────────────────────────
   void _paintRelations(Canvas canvas, Size size) {
-    final rng = _Seeded(philosophy.id);
+    final rng = _Seeded(seed);
     final c1 = colors[0];
     final c2 = colors[1];
 
-    // Generate node positions
     final nodeCount = 7 + rng.nextInt(5);
     final nodes = List.generate(nodeCount, (i) {
       final r = size.width * rng.range(0.1, 0.42);
       final angle = (2 * math.pi * i / nodeCount) + rng.range(-0.3, 0.3);
-      return Offset(
-        size.width * 0.5 + r * math.cos(angle),
-        size.height * 0.5 + r * math.sin(angle),
-      );
+      return Offset(size.width * 0.5 + r * math.cos(angle), size.height * 0.5 + r * math.sin(angle));
     });
 
-    // Connection threads between all nodes
     for (int i = 0; i < nodes.length; i++) {
       for (int j = i + 1; j < nodes.length; j++) {
         final dist = (nodes[i] - nodes[j]).distance;
@@ -604,79 +460,47 @@ class _ArtPainter extends CustomPainter {
         final phase = t * 2 * math.pi * 0.4 + i * 0.7 + j * 0.3;
         final pulse = math.sin(phase) * 0.5 + 0.5;
 
-        // Bezier thread with slight curve
         final mid = Offset(
           (nodes[i].dx + nodes[j].dx) / 2 + rng.range(-20, 20),
-          (nodes[i].dy + nodes[j].dy) / 2 + rng.range(-20, 20),
-        );
+          (nodes[i].dy + nodes[j].dy) / 2 + rng.range(-20, 20));
         final path = Path()
           ..moveTo(nodes[i].dx, nodes[i].dy)
           ..quadraticBezierTo(mid.dx, mid.dy, nodes[j].dx, nodes[j].dy);
-
-        canvas.drawPath(
-          path,
-          Paint()
-            ..color = Color.lerp(c1, c2, rng.next())!
-                .withValues(alpha: (opacity + pulse * 0.08).clamp(0, 0.3))
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 0.8 + pulse * 0.4,
-        );
+        canvas.drawPath(path, Paint()
+          ..color = Color.lerp(c1, c2, rng.next())!.withValues(alpha: (opacity + pulse * 0.08).clamp(0, 0.3))
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.8 + pulse * 0.4);
       }
     }
 
-    // Node circles with pulse
     for (int i = 0; i < nodes.length; i++) {
       final phase = t * 2 * math.pi * 0.6 + i * 1.1;
       final pulse = math.sin(phase) * 0.5 + 0.5;
       final nr = 4.0 + pulse * 3.0;
       final color = Color.lerp(c1, c2, i / nodeCount)!;
-
-      // Glow
-      canvas.drawCircle(
-        nodes[i],
-        nr * 3,
-        Paint()
-          ..color = color.withValues(alpha: 0.1 + pulse * 0.08)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
-      );
-      // Core
-      canvas.drawCircle(
-        nodes[i],
-        nr,
-        Paint()..color = color.withValues(alpha: 0.7 + pulse * 0.3),
-      );
+      canvas.drawCircle(nodes[i], nr * 3, Paint()
+        ..color = color.withValues(alpha: 0.1 + pulse * 0.08)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
+      canvas.drawCircle(nodes[i], nr, Paint()..color = color.withValues(alpha: 0.7 + pulse * 0.3));
     }
 
-    // Central hub
     final hubPulse = math.sin(t * 2 * math.pi * 0.8) * 0.5 + 0.5;
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      16 + hubPulse * 6,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [c1.withValues(alpha: 0.6), c2.withValues(alpha: 0.2), Colors.transparent],
-        ).createShader(Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2),
-          radius: 22 + hubPulse * 6,
-        )),
-    );
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 16 + hubPulse * 6, Paint()
+      ..shader = RadialGradient(
+        colors: [c1.withValues(alpha: 0.6), c2.withValues(alpha: 0.2), Colors.transparent],
+      ).createShader(Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: 22 + hubPulse * 6)));
   }
 
-  // ── Vignette ──────────────────────────────────────────────────────────────
-
+  // ── Vignette ─────────────────────────────────────────────────────────────
   void _paintVignette(Canvas canvas, Size size) {
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()
-        ..shader = RadialGradient(
-          center: Alignment.center,
-          radius: 0.85,
-          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.55)],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center, radius: 0.85,
+        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.55)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)));
   }
 
   @override
-  bool shouldRepaint(_ArtPainter old) =>
-      old.t != t || old.philosophy.id != philosophy.id;
+  bool shouldRepaint(covariant _ArtPainter old) =>
+      old.t != t || old.seed != seed || old.visualStyle != visualStyle;
 }

@@ -56,10 +56,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   static const Map<int, String> _philosophyMap = {
-    0: 'spartan_discipline',
-    1: 'marcus_aurelius',
-    2: 'diogenes',
-    3: 'nietzsche',
+          0: 'stoicism',
+          1: 'existentialism',
+          2: 'nihilism',
+          3: 'minimalism',
   };
 
   String _computePhilosophyId() {
@@ -71,7 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       firstChoice ??= id;
       counts[id] = (counts[id] ?? 0) + 1;
     }
-    if (counts.isEmpty) return 'spartan_discipline';
+    if (counts.isEmpty) return 'stoicism';  // default if no answers (shouldn't happen since we fill them on skip)
     String best = counts.keys.first;
     for (final id in counts.keys) {
       if (counts[id]! > counts[best]! ||

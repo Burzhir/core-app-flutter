@@ -3,32 +3,30 @@ import 'package:provider/provider.dart';
 
 import '../core/app_colors.dart';
 import '../core/app_state.dart';
-import '../data/philosophies_data.dart';
-import '../data/philosophy_art.dart';  
+import '../data/isms_data.dart';
+import '../widgets/isms_art.dart';        // ✅ updated import
+
 // ═══════════════════════════════════════════════════════════════════════════════
-// Philosophies Screen — browsable grid of all philosophies.
-// Top section shows which ones the user has been matched to most.
-// Now includes generative art for every entry + full deep‑dive detail sheet.
+// Isms Screen — browsable grid of all 21 philosophical isms.
+// Top section shows which isms the user has been matched to most.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-class PhilosophiesScreen extends StatefulWidget {
-  const PhilosophiesScreen({super.key});
-
+class IsmsScreen extends StatefulWidget {
+  const IsmsScreen({super.key});
   @override
-  State<PhilosophiesScreen> createState() => _PhilosophiesScreenState();
+  State<IsmsScreen> createState() => _IsmsScreenState();
 }
 
-class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
+class _IsmsScreenState extends State<IsmsScreen> {
   String _search = '';
 
-  List<PhilosophyMeta> get _filtered {
-    if (_search.isEmpty) return kPhilosophies;
+  List<IsmMeta> get _filtered {
+    if (_search.isEmpty) return kIsms;
     final q = _search.toLowerCase();
-    return kPhilosophies
-        .where((p) =>
-            p.name.toLowerCase().contains(q) ||
-            p.thinker.toLowerCase().contains(q) ||
-            p.tagline.toLowerCase().contains(q))
+    return kIsms
+        .where((ism) =>
+            ism.name.toLowerCase().contains(q) ||
+            ism.tagline.toLowerCase().contains(q))
         .toList();
   }
 
@@ -45,13 +43,11 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
             Expanded(
               child: Consumer<AppState>(
                 builder: (_, state, __) {
-                  final top = state.topPhilosophies;
+                  final top = state.topIsms;        // ✅ new getter
                   return CustomScrollView(
                     slivers: [
                       if (top.isNotEmpty && _search.isEmpty) ...[
-                        SliverToBoxAdapter(
-                          child: _buildYourMatchesSection(top),
-                        ),
+                        SliverToBoxAdapter(child: _buildYourMatchesSection(top)),
                       ],
                       SliverToBoxAdapter(
                         child: Padding(
@@ -71,8 +67,7 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
                               Text(
                                 '${_filtered.length}',
                                 style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 11,
+                                  color: AppColors.textMuted, fontSize: 11,
                                 ),
                               ),
                             ],
@@ -90,11 +85,9 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
                             childAspectRatio: 0.85,
                           ),
                           delegate: SliverChildBuilderDelegate(
-                            (_, i) => _PhilosophyCard(
-                              philosophy: _filtered[i],
-                              isMatched: top.any(
-                                (e) => e.key == _filtered[i].name,
-                              ),
+                            (_, i) => _IsmCard(
+                              ism: _filtered[i],
+                              isMatched: top.any((e) => e.key == _filtered[i].name),
                               matchCount: top
                                   .where((e) => e.key == _filtered[i].name)
                                   .map((e) => e.value)
@@ -115,8 +108,6 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
     );
   }
 
-  // ── Header (dynamic count) ─────────────────────────────────────────────────
-
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -130,16 +121,14 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
             child: const Text(
               'LIBRARY',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 4,
+                color: Colors.white, fontSize: 22,
+                fontWeight: FontWeight.w900, letterSpacing: 4,
               ),
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            '${kPhilosophies.length} frameworks. One for every battle.',
+            '${kIsms.length} frameworks. One for every battle.',
             style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ],
@@ -147,9 +136,8 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
     );
   }
 
-  // ── Search bar (unchanged) ─────────────────────────────────────────────────
-
   Widget _buildSearchBar() {
+    // identical to before, just search hint text changed
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Container(
@@ -163,20 +151,16 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
           onChanged: (v) => setState(() => _search = v),
           style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
           decoration: const InputDecoration(
-            hintText: 'Search thinkers, philosophies…',
+            hintText: 'Search isms…',
             hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
-            prefixIcon:
-                Icon(Icons.search_rounded, color: AppColors.textMuted, size: 18),
+            prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted, size: 18),
             border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
         ),
       ),
     );
   }
-
-  // ── "Your matches" horizontal strip (now with art) ─────────────────────────
 
   Widget _buildYourMatchesSection(List<MapEntry<String, int>> top) {
     return Column(
@@ -187,10 +171,8 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
           child: Text(
             'YOUR MOST MATCHED',
             style: TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2,
+              color: AppColors.textMuted, fontSize: 11,
+              fontWeight: FontWeight.w700, letterSpacing: 2,
             ),
           ),
         ),
@@ -202,12 +184,12 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
             itemCount: top.length,
             itemBuilder: (_, i) {
               final entry = top[i];
-              final meta = kPhilosophies.firstWhere(
-                (p) => p.name == entry.key,
-                orElse: () => kPhilosophies.first,
+              // find ism by name (key)
+              final ism = kIsms.firstWhere(
+                (i) => i.name == entry.key,
+                orElse: () => kIsms.first,
               );
-              final colors = meta.gradientColors;   // ✅ use direct gradient
-
+              final colors = ism.gradientColors;
               return Container(
                 width: 180,
                 margin: const EdgeInsets.only(right: 10),
@@ -224,15 +206,14 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
                 ),
                 child: Row(
                   children: [
-                    // 🔥 Generative art replaces emoji
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: PhilosophyArtWidget(
-                        philosophy: meta,
+                      child: IsmArtWidget(
+                        ism: ism,
                         colors: colors,
                         height: 56,
                         width: 56,
-                        animated: false,   // static in strip
+                        animated: false,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -242,12 +223,10 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            meta.name,
+                            ism.name,
                             style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              height: 1.2,
+                              color: AppColors.textPrimary, fontSize: 12,
+                              fontWeight: FontWeight.w700, height: 1.2,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -256,8 +235,7 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
                           Text(
                             '${entry.value}× matched',
                             style: TextStyle(
-                              color: colors[0],
-                              fontSize: 11,
+                              color: colors[0], fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -275,22 +253,22 @@ class _PhilosophiesScreenState extends State<PhilosophiesScreen> {
   }
 }
 
-// ── Philosophy card (grid) ─────────────────────────────────────────────────────
+// ── Individual card in grid ──────────────────────────────────────────────────
 
-class _PhilosophyCard extends StatelessWidget {
-  final PhilosophyMeta philosophy;
+class _IsmCard extends StatelessWidget {
+  final IsmMeta ism;
   final bool isMatched;
   final int  matchCount;
 
-  const _PhilosophyCard({
-    required this.philosophy,
+  const _IsmCard({
+    required this.ism,
     required this.isMatched,
     required this.matchCount,
   });
 
   @override
   Widget build(BuildContext context) {
-    final gradColors = philosophy.gradientColors;   // ✅ direct
+    final gradColors = ism.gradientColors;
 
     return GestureDetector(
       onTap: () => _openDetail(context, gradColors),
@@ -314,15 +292,14 @@ class _PhilosophyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Art + matched badge row
+            // Art + matched badge
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🔥 Replace emoji with art
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: PhilosophyArtWidget(
-                    philosophy: philosophy,
+                  child: IsmArtWidget(
+                    ism: ism,
                     colors: gradColors,
                     height: 56,
                     width: 56,
@@ -332,8 +309,7 @@ class _PhilosophyCard extends StatelessWidget {
                 const Spacer(),
                 if (isMatched)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
                       color: gradColors[0].withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
@@ -341,8 +317,7 @@ class _PhilosophyCard extends StatelessWidget {
                     child: Text(
                       '$matchCount×',
                       style: TextStyle(
-                        color: gradColors[0],
-                        fontSize: 10,
+                        color: gradColors[0], fontSize: 10,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -350,33 +325,25 @@ class _PhilosophyCard extends StatelessWidget {
               ],
             ),
             const Spacer(),
-
-            // Name
             Text(
-              philosophy.name,
+              ism.name,
               style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                height: 1.25,
+                color: AppColors.textPrimary, fontSize: 13,
+                fontWeight: FontWeight.w800, height: 1.25,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-
-            // Thinker
             Text(
-              philosophy.thinker,
+              ism.category,  // e.g. "meaning_existence"
               style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
-
-            // Tagline
             Text(
-              philosophy.tagline,
+              ism.tagline,
               style: TextStyle(
                 color: AppColors.textSecondary.withValues(alpha: 0.8),
                 fontSize: 11,
@@ -400,24 +367,18 @@ class _PhilosophyCard extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => _PhilosophyDetailSheet(
-        philosophy: philosophy,
-        gradColors: gradColors,
-      ),
+      builder: (_) => _IsmDetailSheet(ism: ism, gradColors: gradColors),
     );
   }
 }
 
-// ── Detail sheet (NOW WITH FULL DEEP‑DIVE CONTENT) ───────────────────────────
+// ── Detail sheet ─────────────────────────────────────────────────────────────
 
-class _PhilosophyDetailSheet extends StatelessWidget {
-  final PhilosophyMeta philosophy;
-  final List<Color>    gradColors;
+class _IsmDetailSheet extends StatelessWidget {
+  final IsmMeta ism;
+  final List<Color> gradColors;
 
-  const _PhilosophyDetailSheet({
-    required this.philosophy,
-    required this.gradColors,
-  });
+  const _IsmDetailSheet({required this.ism, required this.gradColors});
 
   @override
   Widget build(BuildContext context) {
@@ -440,209 +401,149 @@ class _PhilosophyDetailSheet extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 20),
 
-          // 🔥 ART HEADER
+          // Art header
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: PhilosophyArtWidget(
-              philosophy: philosophy,
+            child: IsmArtWidget(
+              ism: ism,
               colors: gradColors,
               height: 180,
             ),
           ),
-
           const SizedBox(height: 20),
 
-          // Icon + name + thinker
+          // Icon + name + category
           Row(
             children: [
-              Text(philosophy.icon, style: const TextStyle(fontSize: 40)),
+              Text(ism.icon, style: const TextStyle(fontSize: 40)),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      philosophy.name,
+                      ism.name,
                       style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
+                        color: AppColors.textPrimary, fontSize: 20,
+                        fontWeight: FontWeight.w800, height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(philosophy.era,
-                        style: const TextStyle(
-                            color: AppColors.textMuted, fontSize: 13)),
+                    Text(ism.category,
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
                   ],
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 16),
           Container(height: 1, color: AppColors.surfaceAlt),
           const SizedBox(height: 16),
 
           // Tagline
           Text(
-            '"${philosophy.tagline}"',
+            '"${ism.tagline}"',
             style: TextStyle(
-              color: gradColors[0],
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
+              color: gradColors[0], fontSize: 16,
+              fontStyle: FontStyle.italic, fontWeight: FontWeight.w600, height: 1.4,
             ),
           ),
           const SizedBox(height: 16),
 
-          // ── OVERVIEW ──
+          // Overview
           _buildSectionTitle('OVERVIEW', gradColors),
           const SizedBox(height: 8),
-          Text(
-            philosophy.overview,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              height: 1.7,
-            ),
-          ),
-
+          Text(ism.overview, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.7)),
           const SizedBox(height: 24),
 
-          // ── HISTORICAL CONTEXT ──
+          // Historical context
           _buildSectionTitle('HISTORICAL CONTEXT', gradColors),
           const SizedBox(height: 8),
-          Text(
-            philosophy.historicalContext,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              height: 1.7,
-            ),
-          ),
-
+          Text(ism.historicalContext, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.7)),
           const SizedBox(height: 24),
 
-          // ── KEY TEACHINGS ──
-          _buildSectionTitle('KEY TEACHINGS', gradColors),
+          // Core tenets (list of strings)
+          _buildSectionTitle('CORE TENETS', gradColors),
           const SizedBox(height: 8),
-          ...philosophy.keyTeachings.map((t) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.title,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      t.body,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                        height: 1.6,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-
-          const SizedBox(height: 24),
-
-          // ── MODERN APPLICATION ──
-          _buildSectionTitle('MODERN APPLICATION', gradColors),
-          const SizedBox(height: 8),
-          Text(
-            philosophy.modernApplication,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              height: 1.7,
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // ── QUOTES ──
-          _buildSectionTitle('DEFINING QUOTES', gradColors),
-          const SizedBox(height: 8),
-          ...philosophy.quotes.map((q) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '“${q.text}”',
-                      style: TextStyle(
-                        color: gradColors[0],
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '— ${q.source}',
-                      style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-
-          const SizedBox(height: 24),
-
-          // ── KEY WORKS ──
-          _buildSectionTitle('KEY WORKS', gradColors),
-          const SizedBox(height: 8),
-          ...philosophy.keyWorks.map((w) => Padding(
+          ...ism.coreTenets.map((t) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('• ',
-                        style: TextStyle(color: AppColors.textMuted)),
+                    const Text('• ', style: TextStyle(color: AppColors.textMuted)),
                     Expanded(
-                      child: Text(
-                        w,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                          height: 1.5,
-                        ),
-                      ),
+                      child: Text(t, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5)),
                     ),
                   ],
                 ),
               )),
-
           const SizedBox(height: 24),
 
-          // ── CHALLENGE BOX ──
+          // Notable Figures
+          _buildSectionTitle('NOTABLE FIGURES', gradColors),
+          const SizedBox(height: 8),
+          ...ism.notableFigures.map((nf) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(nf.name, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text(nf.contribution, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.4)),
+                  ],
+                ),
+              )),
+          const SizedBox(height: 24),
+
+          // Modern application
+          _buildSectionTitle('MODERN APPLICATION', gradColors),
+          const SizedBox(height: 8),
+          Text(ism.modernApplication, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.7)),
+          const SizedBox(height: 24),
+
+          // Quotes (strings)
+          _buildSectionTitle('QUOTES', gradColors),
+          const SizedBox(height: 8),
+          ...ism.quotes.map((q) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  q,
+                  style: TextStyle(
+                    color: gradColors[0], fontSize: 13,
+                    fontStyle: FontStyle.italic, height: 1.5,
+                  ),
+                ),
+              )),
+          const SizedBox(height: 24),
+
+          // Key works
+          _buildSectionTitle('KEY WORKS', gradColors),
+          const SizedBox(height: 8),
+          ...ism.keyWorks.map((w) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• ', style: TextStyle(color: AppColors.textMuted)),
+                    Expanded(
+                      child: Text(w, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5)),
+                    ),
+                  ],
+                ),
+              )),
+          const SizedBox(height: 24),
+
+          // Challenge box
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  gradColors[0].withValues(alpha: 0.15),
-                  gradColors[1].withValues(alpha: 0.08),
-                ],
+                colors: [gradColors[0].withValues(alpha: 0.15), gradColors[1].withValues(alpha: 0.08)],
               ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                  color: gradColors[0].withValues(alpha: 0.35), width: 1.2),
+              border: Border.all(color: gradColors[0].withValues(alpha: 0.35), width: 1.2),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,23 +552,11 @@ class _PhilosophyDetailSheet extends StatelessWidget {
                   children: [
                     Icon(Icons.bolt_rounded, color: gradColors[0], size: 16),
                     const SizedBox(width: 6),
-                    Text(
-                      'THE CHALLENGE',
-                      style: TextStyle(
-                        color: gradColors[0], fontSize: 10,
-                        fontWeight: FontWeight.w800, letterSpacing: 1.5,
-                      ),
-                    ),
+                    Text('THE CHALLENGE', style: TextStyle(color: gradColors[0], fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5)),
                   ],
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  philosophy.challenge,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14, height: 1.6,
-                  ),
-                ),
+                Text(ism.challenge, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.6)),
               ],
             ),
           ),
@@ -676,28 +565,12 @@ class _PhilosophyDetailSheet extends StatelessWidget {
     );
   }
 
-  // Helper for section titles
   Widget _buildSectionTitle(String title, List<Color> colors) {
     return Row(
       children: [
-        Container(
-          width: 4,
-          height: 14,
-          decoration: BoxDecoration(
-            color: colors[0],
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
+        Container(width: 4, height: 14, decoration: BoxDecoration(color: colors[0], borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            color: colors[0],
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 2,
-          ),
-        ),
+        Text(title, style: TextStyle(color: colors[0], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 2)),
       ],
     );
   }

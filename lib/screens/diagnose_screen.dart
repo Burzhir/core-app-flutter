@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'dart:convert';
 
 import '../core/app_colors.dart';
-import '../core/app_config.dart';
 import '../core/app_state.dart';
 import '../models/philosophy_result.dart';
 import '../models/history_entry.dart';
+import '../services/api_service.dart';          
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Diagnose Screen
@@ -26,6 +24,8 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
   final TextEditingController _controller  = TextEditingController();
   final ScrollController      _scroll      = ScrollController();
   final FocusNode             _focus       = FocusNode();
+
+  final ApiService            _api         = ApiService();   // ✅ API layer
 
   PhilosophyResult? _result;
   bool    _loading  = false;
@@ -80,7 +80,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     super.dispose();
   }
 
-  // ── API ────────────────────────────────────────────────────────────────────
+  // ── API Call (updated) ──────────────────────────────────────────────────────
 
   Future<void> _getGuidance() async {
     final text = _controller.text.trim();
@@ -91,65 +91,42 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     _resultCtrl.reset();
 
     try {
-      final response = await http.post(
-        Uri.parse(AppConfig.diagnoseEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'answers': [text]}),
-      ).timeout(const Duration(seconds: 45));
+      final result = await _api.diagnose(text);           // ✅ clean call
 
       if (!mounted) return;
 
-      if (response.statusCode == 200) {
-        final data   = jsonDecode(response.body) as Map<String, dynamic>;
-        final result = PhilosophyResult.fromJson(data);
+      setState(() { _result = result; _loading = false; });
 
-        setState(() { _result = result; _loading = false; });
+      // Persist to shared state
+      await context.read<AppState>().addDiagnosis(
+        HistoryEntry(
+          result:    result,
+          userInput: text,
+          timestamp: DateTime.now(),
+        ),
+      );
 
-        // Persist to shared state so Today/Profile/Journal can read it
-        await context.read<AppState>().addDiagnosis(
-          HistoryEntry(
-            result:    result,
-            userInput: text,
-            timestamp: DateTime.now(),
-          ),
-        );
-
-        await _resultCtrl.forward();
-
-        await Future.delayed(const Duration(milliseconds: 150));
-        if (_scroll.hasClients) {
-          _scroll.animateTo(
-            _scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 450),
-            curve: Curves.easeOut,
-          );
-        }
-      } else if (response.statusCode == 429) {
-        if (!mounted) return;
-        setState(() {
-          _error   = 'Too many requests. Take a breath and try again.';
-          _loading = false;
-        });
-      } else {
-        if (!mounted) return;
-        final data = jsonDecode(response.body) as Map<String, dynamic>?;
-        setState(() {
-          _error   = data?['error'] as String? ?? 'Server error ${response.statusCode}.';
-          _loading = false;
-        });
-      }
-    } on Exception catch (e) {
+      await _resultCtrl.forward();
+      _scrollDown();
+    } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString().contains('TimeoutException')
-            ? 'Server took too long. Try again.'
-            : 'No connection. Check your network.';
-        _loading = false;
-      });
+      setState(() { _error = e.message; _loading = false; });
     }
   }
 
-  // ── Build ──────────────────────────────────────────────────────────────────
+  void _scrollDown() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) {
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  // ── Build (unchanged) ──────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +195,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
             ),
           ),
           const Spacer(),
-          // Show history count from shared AppState
           Consumer<AppState>(
             builder: (_, state, __) {
               if (state.history.isEmpty) return const SizedBox.shrink();
@@ -267,8 +243,8 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
             letterSpacing: -0.5,
           ),
         ),
-         SizedBox(height: 10),
-         Text(
+        SizedBox(height: 10),
+        Text(
           'No therapy. No hand-holding. Just the philosophy you need to move.',
           style: TextStyle(
             color: AppColors.textSecondary,
@@ -408,7 +384,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     );
   }
 
-  // ── Error ──────────────────────────────────────────────────────────────────
+  // ── Error banner ───────────────────────────────────────────────────────────
 
   Widget _buildErrorBanner() {
     return Container(
@@ -445,7 +421,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section label
             Row(
               children: [
                 Container(
@@ -472,8 +447,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
               ],
             ),
             const SizedBox(height: 14),
-
-            // Card
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -491,7 +464,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Philosophy name + icon header
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
@@ -525,8 +497,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                       ],
                     ),
                   ),
-
-                  // Gradient divider
                   Container(
                     height: 1,
                     decoration: BoxDecoration(
@@ -535,8 +505,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                       ),
                     ),
                   ),
-
-                  // Reason
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Text(
@@ -548,8 +516,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                       ),
                     ),
                   ),
-
-                  // Keyword chips
                   if (r.matchedKeywords.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -565,8 +531,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
                 ],
               ),
             ),
-
-            // Action row
             const SizedBox(height: 12),
             Row(
               children: [
@@ -611,8 +575,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     );
   }
 
-  // ── History sheet ──────────────────────────────────────────────────────────
-
   void _showHistorySheet(List<HistoryEntry> history) {
     showModalBottomSheet(
       context: context,
@@ -636,7 +598,8 @@ class _SourceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAi = source == 'groq';
+    // ✅ updated to also recognize 'openrouter' as AI
+    final isAi = source == 'groq' || source == 'openrouter';
     final color = isAi ? AppColors.accent : AppColors.textMuted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/app_colors.dart';
 import 'screens/today_screen.dart';
 import 'screens/diagnose_screen.dart';
-import 'screens/philosophies_screen.dart';
+import 'screens/isms_screen.dart';
 import 'screens/journal_screen.dart';
 import 'screens/profile_screen.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -43,7 +43,7 @@ class _MainShellState extends State<MainShell> {
   final List<Widget> _screens = const [
     TodayScreen(),
     DiagnoseScreen(),
-    PhilosophiesScreen(),
+    IsmsScreen(),
     JournalScreen(),
     ProfileScreen(),
   ];

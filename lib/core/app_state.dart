@@ -107,8 +107,8 @@ class AppState extends ChangeNotifier {
 
   // ── Derived stats for Profile screen ─────────────────────────────────────
 
-  /// Returns philosophy name → count, sorted descending, top 5.
-  List<MapEntry<String, int>> get topPhilosophies {
+  /// Returns ism name → count, sorted descending, top 5.
+  List<MapEntry<String, int>> get topIsms {
     final freq = <String, int>{};
     for (final e in _history) {
       freq[e.result.philosophy] = (freq[e.result.philosophy] ?? 0) + 1;
