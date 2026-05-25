@@ -6,7 +6,9 @@ import '../core/app_colors.dart';
 import '../core/app_state.dart';
 import '../models/philosophy_result.dart';
 import '../models/history_entry.dart';
-import '../services/api_service.dart';          
+import '../services/api_service.dart';  
+import '../providers/diagnosis_history_provider.dart';
+import '../providers/user_stats_provider.dart';   
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Diagnose Screen
@@ -80,39 +82,39 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     super.dispose();
   }
 
-  // ── API Call (updated) ──────────────────────────────────────────────────────
+  // ── API Call ──────────────────────────────────────────────────────
 
-  Future<void> _getGuidance() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
+ Future<void> _getGuidance() async {
+  final text = _controller.text.trim();
+  if (text.isEmpty) return;
 
-    _focus.unfocus();
-    setState(() { _loading = true; _error = null; _result = null; });
-    _resultCtrl.reset();
+  _focus.unfocus();
+  setState(() { _loading = true; _error = null; _result = null; });
+  _resultCtrl.reset();
 
-    try {
-      final result = await _api.diagnose(text);           // ✅ clean call
+  try {
+    final result = await _api.diagnose(text);
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() { _result = result; _loading = false; });
+    setState(() { _result = result; _loading = false; });
 
-      // Persist to shared state
-      await context.read<AppState>().addDiagnosis(
-        HistoryEntry(
-          result:    result,
-          userInput: text,
-          timestamp: DateTime.now(),
-        ),
-      );
+    final entry = HistoryEntry(
+      result:    result,
+      userInput: text,
+      timestamp: DateTime.now(),
+    );
 
-      await _resultCtrl.forward();
-      _scrollDown();
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() { _error = e.message; _loading = false; });
-    }
+    context.read<DiagnosisHistoryProvider>().add(entry);        // synchronous, no await needed
+    await context.read<UserStatsProvider>().recordDiagnosis();
+
+    await _resultCtrl.forward();
+    _scrollDown();
+  } on ApiException catch (e) {
+    if (!mounted) return;
+    setState(() { _error = e.message; _loading = false; });
   }
+}
 
   void _scrollDown() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -598,8 +600,7 @@ class _SourceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ updated to also recognize 'openrouter' as AI
-    final isAi = source == 'groq' || source == 'openrouter';
+    final isAi = source == 'openrouter';
     final color = isAi ? AppColors.accent : AppColors.textMuted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

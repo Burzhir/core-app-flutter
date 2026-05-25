@@ -1,18 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
 import '../core/app_config.dart';
 import '../models/philosophy_result.dart';
 
-/// Custom exception so the UI can show user‑friendly error messages.
+/// ═══════════════════════════════════════════════════════════════════════════
+/// API Exception
+/// ═══════════════════════════════════════════════════════════════════════════
+
 class ApiException implements Exception {
   final String message;
+
   ApiException(this.message);
 
   @override
   String toString() => message;
 }
 
-/// Single point of contact with the CORE backend.
+/// ═══════════════════════════════════════════════════════════════════════════
+/// API Service
+/// ═══════════════════════════════════════════════════════════════════════════
+
 class ApiService {
   final http.Client _client;
 
@@ -35,8 +44,7 @@ class ApiService {
         throw ApiException('Server error ${response.statusCode}');
       }
     } catch (e) {
-      if (e is ApiException) rethrow;           // let our own errors pass through
-      // For any other error (network, timeout, JSON parsing, etc.)
+      if (e is ApiException) rethrow;
       if (e.toString().contains('TimeoutException')) {
         throw ApiException('Connection timed out. Check your network.');
       }
