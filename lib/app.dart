@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'core/app_colors.dart';
+import 'core/app_theme.dart';
+import 'core/theme_provider.dart';
 import 'screens/today_screen.dart';
 import 'screens/diagnose_screen.dart';
 import 'screens/isms_screen.dart';
@@ -13,16 +16,19 @@ class CoreApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'CORE',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.bg,
-        useMaterial3: true,
-        fontFamily: 'Outfit',
-      ),
-      home: showOnboarding ? const OnboardingScreen() : const MainShell(),
+    // FIX: Consume ThemeProvider so the app actually responds to theme changes
+    return Consumer<ThemeProvider>(
+      builder: (_, themeProvider, __) {
+        return MaterialApp(
+          title: 'CORE',
+          debugShowCheckedModeBanner: false,
+          // FIX: Use AppTheme.dark() / AppTheme.light() instead of hardcoded ThemeData
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: themeProvider.mode,
+          home: showOnboarding ? const OnboardingScreen() : const MainShell(),
+        );
+      },
     );
   }
 }
@@ -39,7 +45,6 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  // These are instantiated once and kept alive by IndexedStack.
   final List<Widget> _screens = const [
     TodayScreen(),
     DiagnoseScreen(),
@@ -52,7 +57,6 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      // IndexedStack keeps all screens mounted — state survives tab switching.
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
@@ -87,46 +91,11 @@ class _NavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _NavItem(
-                icon: Icons.wb_sunny_outlined,
-                activeIcon: Icons.wb_sunny,
-                label: 'Today',
-                index: 0,
-                currentIndex: currentIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                icon: Icons.flash_on_outlined,
-                activeIcon: Icons.flash_on,
-                label: 'Diagnose',
-                index: 1,
-                currentIndex: currentIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                icon: Icons.library_books_outlined,
-                activeIcon: Icons.library_books,
-                label: 'Library',
-                index: 2,
-                currentIndex: currentIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                icon: Icons.book_outlined,
-                activeIcon: Icons.book,
-                label: 'Journal',
-                index: 3,
-                currentIndex: currentIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
-                label: 'Profile',
-                index: 4,
-                currentIndex: currentIndex,
-                onTap: onTap,
-              ),
+              _NavItem(icon: Icons.wb_sunny_outlined, activeIcon: Icons.wb_sunny,         label: 'Today',    index: 0, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(icon: Icons.flash_on_outlined, activeIcon: Icons.flash_on,         label: 'Diagnose', index: 1, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(icon: Icons.library_books_outlined, activeIcon: Icons.library_books, label: 'Library',  index: 2, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(icon: Icons.book_outlined,     activeIcon: Icons.book,             label: 'Journal',  index: 3, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(icon: Icons.person_outline,    activeIcon: Icons.person,           label: 'Profile',  index: 4, currentIndex: currentIndex, onTap: onTap),
             ],
           ),
         ),

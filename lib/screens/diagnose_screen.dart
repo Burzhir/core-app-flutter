@@ -3,12 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../core/app_colors.dart';
-import '../core/app_state.dart';
 import '../models/philosophy_result.dart';
 import '../models/history_entry.dart';
-import '../services/api_service.dart';  
+import '../services/api_service.dart';
 import '../providers/diagnosis_history_provider.dart';
-import '../providers/user_stats_provider.dart';   
+import '../providers/user_stats_provider.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Diagnose Screen
@@ -27,7 +26,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
   final ScrollController      _scroll      = ScrollController();
   final FocusNode             _focus       = FocusNode();
 
-  final ApiService            _api         = ApiService();   // ✅ API layer
+  final ApiService            _api         = ApiService();
 
   PhilosophyResult? _result;
   bool    _loading  = false;
@@ -82,39 +81,39 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     super.dispose();
   }
 
-  // ── API Call ──────────────────────────────────────────────────────
+  // ── API Call ──────────────────────────────────────────────────────────────
 
- Future<void> _getGuidance() async {
-  final text = _controller.text.trim();
-  if (text.isEmpty) return;
+  Future<void> _getGuidance() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
 
-  _focus.unfocus();
-  setState(() { _loading = true; _error = null; _result = null; });
-  _resultCtrl.reset();
+    _focus.unfocus();
+    setState(() { _loading = true; _error = null; _result = null; });
+    _resultCtrl.reset();
 
-  try {
-    final result = await _api.diagnose(text);
+    try {
+      final result = await _api.diagnose(text);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() { _result = result; _loading = false; });
+      setState(() { _result = result; _loading = false; });
 
-    final entry = HistoryEntry(
-      result:    result,
-      userInput: text,
-      timestamp: DateTime.now(),
-    );
+      final entry = HistoryEntry(
+        result:    result,
+        userInput: text,
+        timestamp: DateTime.now(),
+      );
 
-    context.read<DiagnosisHistoryProvider>().add(entry);        // synchronous, no await needed
-    await context.read<UserStatsProvider>().recordDiagnosis();
+      context.read<DiagnosisHistoryProvider>().add(entry);
+      await context.read<UserStatsProvider>().recordDiagnosis();
 
-    await _resultCtrl.forward();
-    _scrollDown();
-  } on ApiException catch (e) {
-    if (!mounted) return;
-    setState(() { _error = e.message; _loading = false; });
+      await _resultCtrl.forward();
+      _scrollDown();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() { _error = e.message; _loading = false; });
+    }
   }
-}
 
   void _scrollDown() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -128,7 +127,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
     });
   }
 
-  // ── Build (unchanged) ──────────────────────────────────────────────────────
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -177,57 +176,58 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
 
   // ── Header ─────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Row(
-        children: [
-          ShaderMask(
-            shaderCallback: (b) => const LinearGradient(
-              colors: [Color(0xFFBF5AF2), Color(0xFF64D2FF)],
-            ).createShader(b),
-            child: const Text(
-              'DIAGNOSE',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 4,
-              ),
+Widget _buildHeader() {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+    child: Row(
+      children: [
+        ShaderMask(
+          shaderCallback: (b) => const LinearGradient(
+            colors: [Color(0xFFBF5AF2), Color(0xFF64D2FF)],
+          ).createShader(b),
+          child: const Text(
+            'DIAGNOSE',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 4,
             ),
           ),
-          const Spacer(),
-          Consumer<AppState>(
-            builder: (_, state, __) {
-              if (state.history.isEmpty) return const SizedBox.shrink();
-              return GestureDetector(
-                onTap: () => _showHistorySheet(state.history),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceAlt,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history_rounded,
-                          size: 13, color: AppColors.textMuted),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${state.history.length}',
-                        style: const TextStyle(
-                            color: AppColors.textMuted, fontSize: 12),
-                      ),
-                    ],
-                  ),
+        ),
+        const Spacer(),
+        // FIX: was Consumer<AppState> — AppState is not provided, causes crash
+        Consumer<DiagnosisHistoryProvider>(
+          builder: (_, historyProvider, __) {
+            if (historyProvider.history.isEmpty) return const SizedBox.shrink();
+            return GestureDetector(
+              onTap: () => _showHistorySheet(historyProvider.history),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceAlt,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+                child: Row(
+                  children: [
+                    const Icon(Icons.history_rounded,
+                        size: 13, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${historyProvider.history.length}',
+                      style: const TextStyle(
+                          color: AppColors.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+}
 
   // ── Headline ───────────────────────────────────────────────────────────────
 
@@ -590,7 +590,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen>
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Shared sub-widgets (private to this file)
+// Shared sub-widgets
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _SourceBadge extends StatelessWidget {

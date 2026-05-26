@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/app_colors.dart';
-import '../core/app_state.dart';
 import '../models/journal_entry.dart';
+import '../providers/diagnosis_history_provider.dart';
+import '../providers/journal_provider.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Journal Screen
-// Entries persist via SharedPreferences (handled in AppState).
+// Entries persist via SharedPreferences (handled in JournalProvider).
 // Each entry auto-links to the last active philosophy diagnosis.
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -30,13 +31,13 @@ class _JournalScreenState extends State<JournalScreen> {
     super.dispose();
   }
 
-  Future<void> _submit(AppState state) async {
+  Future<void> _submit(DiagnosisHistoryProvider diag, JournalProvider journal) async {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
 
     _focus.unfocus();
 
-    final last = state.lastDiagnosis;
+    final last = diag.lastDiagnosis;
     final entry = JournalEntry(
       id:               DateTime.now().millisecondsSinceEpoch.toString(),
       text:             text,
@@ -45,7 +46,7 @@ class _JournalScreenState extends State<JournalScreen> {
       createdAt:        DateTime.now(),
     );
 
-    await state.addJournalEntry(entry);
+    await journal.addEntry(entry);
 
     _ctrl.clear();
     setState(() => _composing = false);
@@ -53,16 +54,16 @@ class _JournalScreenState extends State<JournalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (context, state, _) {
-        final grouped = _groupByDate(state.journal);
+    return Consumer2<DiagnosisHistoryProvider, JournalProvider>(
+      builder: (context, diag, journal, _) {
+        final grouped = _groupByDate(journal.journal);
 
         return Scaffold(
           backgroundColor: AppColors.bg,
           body: SafeArea(
             child: Column(
               children: [
-                _buildHeader(state),
+                _buildHeader(diag, journal),
                 // Compose bar
                 AnimatedCrossFade(
                   duration: const Duration(milliseconds: 250),
@@ -70,25 +71,23 @@ class _JournalScreenState extends State<JournalScreen> {
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   firstChild: _buildComposeTrigger(),
-                  secondChild: _buildComposeBox(state),
+                  secondChild: _buildComposeBox(diag, journal),
                 ),
                 const SizedBox(height: 4),
 
                 // Entry list
                 Expanded(
-                  child: state.journal.isEmpty
+                  child: journal.journal.isEmpty
                       ? _buildEmptyState()
                       : ListView.builder(
-                          padding:
-                              const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
                           itemCount: grouped.length,
                           itemBuilder: (_, i) {
                             final section = grouped[i];
                             return _DateSection(
                               label: section.$1,
                               entries: section.$2,
-                              onDelete: (id) =>
-                                  state.deleteJournalEntry(id),
+                              onDelete: (id) => journal.deleteEntry(id),
                             );
                           },
                         ),
@@ -103,7 +102,7 @@ class _JournalScreenState extends State<JournalScreen> {
 
   // ── Header ─────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(AppState state) {
+  Widget _buildHeader(DiagnosisHistoryProvider diag, JournalProvider journal) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
@@ -127,7 +126,7 @@ class _JournalScreenState extends State<JournalScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                '${state.journalCount} reflection${state.journalCount == 1 ? '' : 's'}',
+                '${journal.journalCount} reflection${journal.journalCount == 1 ? '' : 's'}',
                 style: const TextStyle(
                     color: AppColors.textMuted, fontSize: 12),
               ),
@@ -191,8 +190,8 @@ class _JournalScreenState extends State<JournalScreen> {
 
   // ── Compose box (expanded) ─────────────────────────────────────────────────
 
-  Widget _buildComposeBox(AppState state) {
-    final last = state.lastDiagnosis;
+  Widget _buildComposeBox(DiagnosisHistoryProvider diag, JournalProvider journal) {
+    final last = diag.lastDiagnosis;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
@@ -260,7 +259,7 @@ class _JournalScreenState extends State<JournalScreen> {
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: () => _submit(state),
+                  onTap: () => _submit(diag, journal),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),

@@ -4,10 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'core/app_config.dart';
+import 'core/theme_provider.dart';
 import 'app.dart';
-import 'providers/diagnosis_history_provider.dart';   
-import 'providers/journal_provider.dart';              
-import 'providers/user_stats_provider.dart';           
+import 'providers/diagnosis_history_provider.dart';
+import 'providers/journal_provider.dart';
+import 'providers/user_stats_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,7 @@ void main() async {
     ),
   );
 
-  // Wake up Render server silently (ignore result)
+  // Wake up Render server silently
   try {
     http.get(Uri.parse('${AppConfig.baseUrl}/health'))
         .timeout(const Duration(seconds: 5));
@@ -28,10 +29,10 @@ void main() async {
   final onboardingDone = prefs.getBool('onboarding_done') ?? false;
 
   final diagnosisProvider = DiagnosisHistoryProvider();
-  final journalProvider = JournalProvider();
-  final statsProvider = UserStatsProvider();
+  final journalProvider   = JournalProvider();
+  final statsProvider     = UserStatsProvider();
+  final themeProvider     = ThemeProvider();
 
-  // Load persisted data
   await journalProvider.load();
   await statsProvider.load();
 
@@ -41,6 +42,7 @@ void main() async {
         ChangeNotifierProvider.value(value: diagnosisProvider),
         ChangeNotifierProvider.value(value: journalProvider),
         ChangeNotifierProvider.value(value: statsProvider),
+        ChangeNotifierProvider.value(value: themeProvider),
       ],
       child: CoreApp(showOnboarding: !onboardingDone),
     ),

@@ -1,15 +1,20 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/history_entry.dart';
 
 class DiagnosisHistoryProvider extends ChangeNotifier {
-  final List<HistoryEntry> _history = [];
-  List<HistoryEntry> get history => List.unmodifiable(_history);
-  HistoryEntry? get lastDiagnosis => _history.isEmpty ? null : _history.first;
+  late Box<HistoryEntry> _box;
 
-  /// Returns ism name → count, sorted descending, top 5.
+  DiagnosisHistoryProvider() {
+    _box = Hive.box<HistoryEntry>('history');
+  }
+
+  List<HistoryEntry> get history => _box.values.toList().reversed.toList();
+  HistoryEntry? get lastDiagnosis => history.isEmpty ? null : history.first;
+
   List<MapEntry<String, int>> get topIsms {
     final freq = <String, int>{};
-    for (final e in _history) {
+    for (final e in _box.values) {
       freq[e.result.philosophy] = (freq[e.result.philosophy] ?? 0) + 1;
     }
     return (freq.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
@@ -18,13 +23,12 @@ class DiagnosisHistoryProvider extends ChangeNotifier {
   }
 
   void add(HistoryEntry entry) {
-    _history.insert(0, entry);
-    if (_history.length > 50) _history.removeLast();
+    _box.add(entry);
     notifyListeners();
   }
 
   void clear() {
-    _history.clear();
+    _box.clear();
     notifyListeners();
   }
 }

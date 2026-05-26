@@ -1,50 +1,38 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/journal_entry.dart';
 
 class JournalProvider extends ChangeNotifier {
-  final List<JournalEntry> _journal = [];
-  List<JournalEntry> get journal => List.unmodifiable(_journal);
-  int get journalCount => _journal.length;
+  late Box<JournalEntry> _box;
 
-  static const _kJournalKey = 'journal_entries';
-
-  /// Load persisted journal from SharedPreferences.
-  Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_kJournalKey) ?? [];
-    for (final item in raw) {
-      try {
-        _journal.add(JournalEntry.fromJson(jsonDecode(item)));
-      } catch (_) {}
-    }
-    notifyListeners();
+  JournalProvider() {
+    _box = Hive.box<JournalEntry>('journal');
   }
 
+  List<JournalEntry> get journal => _box.values.toList().reversed.toList();
+  int get journalCount => _box.length;
+
+  // Hive loads automatically – kept for compatibility
+  Future<void> load() async {}
+
   Future<void> addEntry(JournalEntry entry) async {
-    _journal.insert(0, entry);
-    await _persist();
+    await _box.add(entry);
     notifyListeners();
   }
 
   Future<void> deleteEntry(String id) async {
-    _journal.removeWhere((e) => e.id == id);
-    await _persist();
-    notifyListeners();
+    final key = _box.keys.firstWhere(
+      (k) => _box.get(k)?.id == id,
+      orElse: () => null,
+    );
+    if (key != null) {
+      await _box.delete(key);
+      notifyListeners();
+    }
   }
 
   Future<void> clear() async {
-    _journal.clear();
-    await _persist();
+    await _box.clear();
     notifyListeners();
-  }
-
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      _kJournalKey,
-      _journal.map((e) => jsonEncode(e.toJson())).toList(),
-    );
   }
 }
