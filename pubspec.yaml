@@ -2,7 +2,7 @@ name: core_app
 description: CORE – Philosophical Diagnostics
 
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -16,6 +16,15 @@ dependencies:
   shimmer: ^3.0.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  uuid: ^4.5.1
+  # Auth
+  firebase_core: ^3.13.1
+  firebase_auth: ^5.5.3
+  google_sign_in: ^6.2.2
+  cloud_firestore: ^5.6.6
+  # Animations
+  flutter_animate: ^4.5.2
+  lottie: ^3.3.1
 
 dev_dependencies:
   flutter_test:
