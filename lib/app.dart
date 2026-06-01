@@ -7,8 +7,8 @@ import 'providers/auth_provider.dart' as core;
 import 'providers/theme_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/today_screen.dart';
-import 'screens/diagnose_screen.dart';
-import 'screens/isms_screen.dart';
+import 'screens/forge_screen.dart';
+import 'screens/library_screen.dart';
 import 'screens/journal_screen.dart';
 import 'screens/profile_screen.dart';
 import 'onboarding/onboarding_screen.dart';
@@ -22,19 +22,19 @@ class CoreApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (_, themeProvider, __) {
         return MaterialApp(
-          title: 'CORE',
+          title:                   'CORE',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(),
-          darkTheme: AppTheme.dark(),
-          themeMode: themeProvider.mode,
-          home: _RootRouter(showOnboarding: showOnboarding),
+          theme:                   AppTheme.light(),
+          darkTheme:               AppTheme.dark(),
+          themeMode:               themeProvider.mode,
+          home:                    _RootRouter(showOnboarding: showOnboarding),
         );
       },
     );
   }
 }
 
-// ── Root router — decides what to show based on auth state ────────────────────
+// ── Root router ───────────────────────────────────────────────────────────────
 
 class _RootRouter extends StatelessWidget {
   final bool showOnboarding;
@@ -47,10 +47,8 @@ class _RootRouter extends StatelessWidget {
     switch (auth.status) {
       case core.AuthStatus.unknown:
         return const _SplashScreen();
-
       case core.AuthStatus.unauthenticated:
         return const AuthScreen();
-
       case core.AuthStatus.authenticated:
         if (showOnboarding) return const OnboardingScreen();
         return const MainShell();
@@ -58,7 +56,7 @@ class _RootRouter extends StatelessWidget {
   }
 }
 
-// ── Splash ─────────────────────────────────────────────────────────────────────
+// ── Splash ────────────────────────────────────────────────────────────────────
 
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
@@ -68,22 +66,36 @@ class _SplashScreen extends StatelessWidget {
     return const Scaffold(
       backgroundColor: AppColors.bg,
       body: Center(
-        child: Text(
-          'CORE',
-          style: TextStyle(
-            color: AppColors.accent,
-            fontSize: 32,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 8,
-            fontFamily: 'Outfit',
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'CORE',
+              style: TextStyle(
+                color:         AppColors.accent,
+                fontSize:      36,
+                fontWeight:    FontWeight.w900,
+                letterSpacing: 10,
+                fontFamily:    'Outfit',
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Forge Yourself',
+              style: TextStyle(
+                color:    AppColors.textMuted,
+                fontSize: 14,
+                letterSpacing: 3,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ── Main shell ─────────────────────────────────────────────────────────────────
+// ── Main shell with 5 tabs ────────────────────────────────────────────────────
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -93,12 +105,12 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  int _currentIndex = 0;
+  int _index = 0;
 
-  final List<Widget> _screens = const [
+  static const _screens = [
     TodayScreen(),
-    DiagnoseScreen(),
-    IsmsScreen(),
+    ForgeScreen(),
+    LibraryScreen(),
     JournalScreen(),
     ProfileScreen(),
   ];
@@ -107,28 +119,28 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: _CosmicNavBar(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+      body: IndexedStack(index: _index, children: _screens),
+      bottomNavigationBar: _NavBar(
+        index: _index,
+        onTap: (i) => setState(() => _index = i),
       ),
     );
   }
 }
 
-// ── Cosmic nav bar ─────────────────────────────────────────────────────────────
+// ── Bottom nav bar ────────────────────────────────────────────────────────────
 
-class _CosmicNavBar extends StatelessWidget {
-  final int currentIndex;
+class _NavBar extends StatelessWidget {
+  final int _index;
   final ValueChanged<int> onTap;
-  const _CosmicNavBar({required this.currentIndex, required this.onTap});
+  const _NavBar({required int index, required this.onTap}) : _index = index;
 
   static const _items = [
-    (Icons.wb_sunny_outlined, Icons.wb_sunny, 'Today'),
-    (Icons.flash_on_outlined, Icons.flash_on, 'Diagnose'),
-    (Icons.library_books_outlined, Icons.library_books, 'Library'),
-    (Icons.book_outlined, Icons.book, 'Journal'),
-    (Icons.person_outline, Icons.person, 'Profile'),
+    (Icons.wb_sunny_outlined,      Icons.wb_sunny,      'Today'),
+    (Icons.compare_arrows_outlined, Icons.compare_arrows, 'Forge'),
+    (Icons.auto_stories_outlined,  Icons.auto_stories,  'Library'),
+    (Icons.book_outlined,          Icons.book,          'Journal'),
+    (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
   ];
 
   @override
@@ -136,14 +148,12 @@ class _CosmicNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.border, width: 1),
-        ),
+        border: Border(top: BorderSide(color: AppColors.border)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent.withValues(alpha: 0.06),
+            color:      AppColors.accent.withValues(alpha: 0.06),
             blurRadius: 20,
-            offset: const Offset(0, -4),
+            offset:     const Offset(0, -4),
           ),
         ],
       ),
@@ -154,9 +164,9 @@ class _CosmicNavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _items.asMap().entries.map((e) {
-              final i = e.key;
-              final item = e.value;
-              final active = i == currentIndex;
+              final i      = e.key;
+              final item   = e.value;
+              final active = i == _index;
               return GestureDetector(
                 onTap: () => onTap(i),
                 behavior: HitTestBehavior.opaque,
@@ -165,7 +175,6 @@ class _CosmicNavBar extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Active indicator dot
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         width: active ? 20 : 0,
@@ -174,10 +183,7 @@ class _CosmicNavBar extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: active
                               ? const LinearGradient(
-                                  colors: [
-                                    Color(0xFFBF5AF2),
-                                    Color(0xFF64D2FF)
-                                  ],
+                                  colors: [Color(0xFFBF5AF2), Color(0xFF64D2FF)],
                                 )
                               : null,
                           borderRadius: BorderRadius.circular(1),
@@ -188,20 +194,17 @@ class _CosmicNavBar extends StatelessWidget {
                         child: Icon(
                           active ? item.$2 : item.$1,
                           key: ValueKey(active),
-                          color:
-                              active ? AppColors.accent : AppColors.textMuted,
-                          size: 22,
+                          color: active ? AppColors.accent : AppColors.textMuted,
+                          size:  22,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         item.$3,
                         style: TextStyle(
-                          color:
-                              active ? AppColors.accent : AppColors.textMuted,
-                          fontSize: 10,
-                          fontWeight:
-                              active ? FontWeight.w700 : FontWeight.w400,
+                          color:      active ? AppColors.accent : AppColors.textMuted,
+                          fontSize:   10,
+                          fontWeight: active ? FontWeight.w700 : FontWeight.w400,
                           fontFamily: 'Outfit',
                         ),
                       ),

@@ -7,7 +7,7 @@ import '../screens/paywall_screen.dart';
 /// Wraps any widget with a freemium blur gate.
 /// If [locked] is true and user is not premium, it shows a blurred overlay.
 class FreemiumGate extends StatelessWidget {
-  final bool locked;
+  final bool   locked;
   final Widget child;
   final String reason;
 
@@ -94,16 +94,16 @@ class FreemiumGate extends StatelessWidget {
   }
 }
 
-/// Shows remaining diagnoses badge in the diagnose screen.
-class DiagnosisQuotaBadge extends StatelessWidget {
-  const DiagnosisQuotaBadge({super.key});
+/// Shows remaining AI messages badge (used in chat-adjacent UIs).
+class AiQuotaBadge extends StatelessWidget {
+  const AiQuotaBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<core.AuthProvider>();
     if (auth.isPremium) return const SizedBox.shrink();
 
-    final remaining = auth.remainingToday;
+    final remaining = auth.remainingAiMessagesToday;
     final color = remaining > 1
         ? AppColors.accent
         : remaining == 1
@@ -121,7 +121,7 @@ class DiagnosisQuotaBadge extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             child: PaywallScreen(
               triggerReason: remaining == 0
-                  ? 'You\'ve used all free diagnoses today'
+                  ? 'You\'ve used all 5 free AI messages today'
                   : null,
             ),
           ),
@@ -137,10 +137,12 @@ class DiagnosisQuotaBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.flash_on_rounded, color: color, size: 13),
+            Icon(Icons.chat_bubble_outline_rounded, color: color, size: 13),
             const SizedBox(width: 4),
             Text(
-              remaining == 0 ? 'No diagnoses left' : '$remaining left today',
+              remaining == 0
+                  ? 'No AI messages left'
+                  : '$remaining left today',
               style: TextStyle(
                 color: color,
                 fontSize: 11,

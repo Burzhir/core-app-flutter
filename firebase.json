@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "core-app-project",
+          "appId": "",
+          "apiKey": "",
+          "messagingSenderId": ""
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "core-app-project",
+          "appId": "",
+          "apiKey": "",
+          "messagingSenderId": ""
+        }
+      },
+      "web": {
+        "default": {
+          "projectId": "core-app-project",
+          "appId": "",
+          "apiKey": "",
+          "messagingSenderId": ""
+        }
+      }
+    }
+  }
+}

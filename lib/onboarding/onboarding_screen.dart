@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../app.dart';
 import '../core/app_colors.dart';
+import '../widgets/cosmic_background.dart';
+import '../app.dart';
+import '../data/comparisons_data.dart';
+import '../models/comparison_model.dart';
 
+/// First-time onboarding:
+/// 1. Welcome → 2. "What are you struggling with?" → 3. Show 3 perspectives
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -11,133 +17,28 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-  final List<int?> _answers = [null, null, null, null];
-  bool _isAdvancing = false;
+  final _pageController = PageController();
+  int _page = 0;
+  ComparisonSituation? _selectedSituation;
 
-  final List<Map<String, dynamic>> _questions = [
-    {
-      'question': "What's your biggest struggle right now?",
-      'options': [
-        'Procrastination / lack of motivation',
-        'Feeling overwhelmed / anxious',
-        'Relationship or social pressure',
-        'Lack of direction / purpose',
-      ],
-    },
-    {
-      'question': 'What do you want most in the next 3 months?',
-      'options': [
-        'Discipline & consistency',
-        'Inner peace & clarity',
-        'Creative breakthroughs',
-        'Better connections with people',
-      ],
-    },
-    {
-      'question': 'Which phrase resonates with you?',
-      'options': [
-        '“Action cures fear.”',
-        '“Let go of what you can’t control.”',
-        '“Originality is the key.”',
-        '“We are shaped by those we love.”',
-      ],
-    },
-    {
-      'question': 'When you face a setback, you usually…',
-      'options': [
-        'Push harder and grind through',
-        'Reflect and adjust your mindset',
-        'Look for a creative workaround',
-        'Seek advice from someone you trust',
-      ],
-    },
-  ];
-
-  static const Map<int, String> _philosophyMap = {
-          0: 'stoicism',
-          1: 'existentialism',
-          2: 'nihilism',
-          3: 'minimalism',
-  };
-
-  String _computePhilosophyId() {
-    final counts = <String, int>{};
-    String? firstChoice;
-    for (final answer in _answers) {
-      if (answer == null) continue;
-      final id = _philosophyMap[answer]!;
-      firstChoice ??= id;
-      counts[id] = (counts[id] ?? 0) + 1;
-    }
-    if (counts.isEmpty) return 'stoicism';  // default if no answers (shouldn't happen since we fill them on skip)
-    String best = counts.keys.first;
-    for (final id in counts.keys) {
-      if (counts[id]! > counts[best]! ||
-          (counts[id] == counts[best] && id == firstChoice)) {
-        best = id;
-      }
-    }
-    return best;
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _goBack() {
-    if (_isAdvancing || _currentPage == 0) return;
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
+  void _next() {
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
     );
-    setState(() => _currentPage--);
+    setState(() => _page++);
   }
 
-  void _onOptionSelected(int optionIndex) {
-    if (_isAdvancing) return;
-    _isAdvancing = true;
-
-    final bool isLastPage = _currentPage == _questions.length - 1;
-
-    setState(() {
-      _answers[_currentPage] = optionIndex;
-      if (!isLastPage) _currentPage++;
-    });
-
-    if (isLastPage) {
-      _finishOnboarding();
-    } else {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      ).then((_) {
-        if (mounted) _isAdvancing = false;
-      });
-    }
+  void _selectSituation(ComparisonSituation situation) {
+    setState(() => _selectedSituation = situation);
+    Future.delayed(const Duration(milliseconds: 200), _next);
   }
 
-  void _skip() {
-    if (_isAdvancing) return;
-    _isAdvancing = true;
-    for (int i = 0; i < _answers.length; i++) {
-      _answers[i] ??= 0;
-    }
-    _finishOnboarding();
-  }
-
-  Future<void> _finishOnboarding() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('onboarding_done', true);
-      await prefs.setString('primary_philosophy_id', _computePhilosophyId());
-    } catch (_) {}
+  Future<void> _finish() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_done', true);
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const MainShell()),
     );
   }
@@ -145,169 +46,418 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.bg,
-              Color(0xFF1E1E1E),
+      backgroundColor: AppColors.bg,
+      body: Stack(
+        children: [
+          const CosmicBackground(),
+          PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _WelcomePage(onNext: _next),
+              _SituationPage(onSelect: _selectSituation),
+              if (_selectedSituation != null)
+                _PerspectivesPage(
+                  situation: _selectedSituation!,
+                  onFinish: _finish,
+                ),
             ],
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Row(
-                  children: List.generate(
-                    _questions.length,
-                    (index) => Expanded(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        height: 4,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: index <= _currentPage
-                              ? AppColors.accent
-                              : AppColors.surfaceAlt,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Page 1: Welcome ──────────────────────────────────────────────────────────
+
+class _WelcomePage extends StatelessWidget {
+  final VoidCallback onNext;
+  const _WelcomePage({required this.onNext});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 60, 28, 40),
+        child: Column(
+          children: [
+            const Spacer(flex: 2),
+
+            Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const RadialGradient(
+                  colors: [Color(0xFF3D1F6E), Color(0xFF0E0B1A)],
+                ),
+                border: Border.all(
+                  color: AppColors.accent.withValues(alpha: 0.7),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accent.withValues(alpha: 0.4),
+                    blurRadius: 30,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text('C',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 36,
+                    fontWeight: FontWeight.w900,
+                    fontFamily: 'Outfit',
                   ),
                 ),
               ),
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _questions.length,
-                  itemBuilder: (_, index) => _buildQuestionPage(index),
+            ).animate().fadeIn(duration: 600.ms).scale(
+              begin: const Offset(0.8, 0.8),
+              end: const Offset(1.0, 1.0),
+            ),
+
+            const SizedBox(height: 28),
+
+            ShaderMask(
+              shaderCallback: (b) => const LinearGradient(
+                colors: [Color(0xFFBF5AF2), Color(0xFF64D2FF)],
+              ).createShader(b),
+              child: const Text(
+                'CORE',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 52,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 10,
+                  fontFamily: 'Outfit',
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24, left: 20, right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (_currentPage > 0)
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: AppColors.textMuted),
-                        onPressed: _goBack,
-                      )
-                    else
-                      const SizedBox(width: 48),
-                    if (_currentPage < _questions.length - 1)
-                      TextButton(
-                        onPressed: _isAdvancing ? null : _skip,
-                        child: const Text(
-                          'Skip →',
-                          style: TextStyle(color: AppColors.textMuted),
-                        ),
-                      )
-                    else
-                      const SizedBox.shrink(),
-                  ],
-                ),
+            ).animate(delay: 200.ms).fadeIn(duration: 600.ms),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'Forge Yourself',
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 15,
+                letterSpacing: 4,
+                fontFamily: 'Outfit',
               ),
-            ],
-          ),
+            ).animate(delay: 300.ms).fadeIn(duration: 600.ms),
+
+            const Spacer(flex: 2),
+
+            const Text(
+              'Get guidance from history\'s greatest\nphilosophical traditions.\n\nJournal, reflect, and challenge your\nthinking from multiple perspectives.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 16,
+                height: 1.7,
+              ),
+            ).animate(delay: 500.ms).fadeIn(duration: 700.ms),
+
+            const Spacer(flex: 3),
+
+            _BigButton(
+              label: "Let's begin",
+              onTap: onNext,
+              delay: 800,
+            ),
+
+            const SizedBox(height: 20),
+            const Text(
+              '12 philosophies · AI mentors · Daily practice',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+            ).animate(delay: 1000.ms).fadeIn(duration: 500.ms),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildQuestionPage(int index) {
-    final question = _questions[index]['question'] as String;
-    final options = List<String>.from(_questions[index]['options'] as List);
-    final selected = _answers[index];
+// ── Page 2: Situation picker ──────────────────────────────────────────────────
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+class _SituationPage extends StatelessWidget {
+  final ValueChanged<ComparisonSituation> onSelect;
+  const _SituationPage({required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'What are you\nstruggling with today?',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 30,
+                fontWeight: FontWeight.w800,
+                height: 1.2,
+                fontFamily: 'Outfit',
+              ),
+            ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.2, end: 0),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'Pick what feels most relevant. CORE will show you\nhow different philosophies see your situation.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
+
+            const SizedBox(height: 28),
+
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.6,
+                ),
+                itemCount: kComparisonSituations.length,
+                itemBuilder: (context, i) {
+                  final s = kComparisonSituations[i];
+                  return GestureDetector(
+                    onTap: () => onSelect(s),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(s.icon, style: const TextStyle(fontSize: 22)),
+                          const SizedBox(height: 6),
+                          Text(
+                            s.title,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ).animate(delay: Duration(milliseconds: 300 + i * 60))
+                    .fadeIn(duration: 400.ms)
+                    .scale(begin: const Offset(0.95, 0.95), end: const Offset(1, 1));
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Page 3: Perspectives result ───────────────────────────────────────────────
+
+class _PerspectivesPage extends StatelessWidget {
+  final ComparisonSituation situation;
+  final VoidCallback         onFinish;
+
+  const _PerspectivesPage({
+    required this.situation,
+    required this.onFinish,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final free = situation.perspectives.take(3).toList();
+
+    return SafeArea(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            question,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-              height: 1.3,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentSoft,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderGlow),
+                  ),
+                  child: Text(
+                    '${situation.icon}  ${situation.title}',
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ).animate().fadeIn(duration: 400.ms),
+
+                const SizedBox(height: 14),
+
+                const Text(
+                  'Three perspectives',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Outfit',
+                  ),
+                ).animate(delay: 100.ms).fadeIn(duration: 500.ms),
+
+                const SizedBox(height: 4),
+
+                const Text(
+                  'Each philosophy approaches this differently. This is what CORE does.',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
+              ],
             ),
           ),
-          const SizedBox(height: 40),
-          ...options.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final text = entry.value;
-            final isSelected = selected == idx;
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onTap: () => _onOptionSelected(idx),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(16),
+          const SizedBox(height: 16),
+
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              itemCount: free.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, i) {
+                final p = free[i];
+                return Container(
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.accent.withValues(alpha: 0.1)
-                        : AppColors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? AppColors.accent : AppColors.surfaceAlt,
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.border),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isSelected ? AppColors.accent : Colors.transparent,
-                          border: Border.all(
-                            color: isSelected ? AppColors.accent : AppColors.textMuted,
-                            width: 2,
+                      Row(
+                        children: [
+                          Text(p.emoji,
+                              style: const TextStyle(fontSize: 20)),
+                          const SizedBox(width: 10),
+                          Text(
+                            p.philosophyName,
+                            style: const TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Outfit',
+                            ),
                           ),
-                        ),
-                        child: isSelected
-                            ? const Icon(Icons.check, size: 16, color: Colors.white)
-                            : null,
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          text,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isSelected
-                                ? AppColors.textPrimary
-                                : AppColors.textSecondary,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                          ),
+                      const SizedBox(height: 10),
+                      Text(
+                        p.keyInsight,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.5,
                         ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        p.perspective.split('\n\n').first,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                          height: 1.6,
+                        ),
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                ),
-              ),
-            );
-          }),
+                ).animate(delay: Duration(milliseconds: 300 + i * 120))
+                  .fadeIn(duration: 500.ms)
+                  .slideY(begin: 0.15, end: 0);
+              },
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            child: _BigButton(
+              label: 'Enter CORE',
+              onTap: onFinish,
+              delay: 800,
+            ),
+          ),
         ],
       ),
     );
+  }
+}
+
+// ── Shared ────────────────────────────────────────────────────────────────────
+
+class _BigButton extends StatelessWidget {
+  final String    label;
+  final VoidCallback onTap;
+  final int       delay;
+
+  const _BigButton({
+    required this.label,
+    required this.onTap,
+    this.delay = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFBF5AF2), Color(0xFF5E5CE6)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color:      AppColors.accent.withValues(alpha: 0.4),
+              blurRadius: 24,
+              offset:     const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color:         Colors.white,
+              fontSize:      15,
+              fontWeight:    FontWeight.w800,
+              letterSpacing: 1.5,
+              fontFamily:    'Outfit',
+            ),
+          ),
+        ),
+      ),
+    ).animate(delay: Duration(milliseconds: delay)).fadeIn(duration: 500.ms);
   }
 }

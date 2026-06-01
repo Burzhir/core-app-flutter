@@ -1,224 +1,287 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../core/app_colors.dart';
-import '../core/theme_provider.dart';
-import '../providers/diagnosis_history_provider.dart';
-import '../providers/journal_provider.dart';
-import '../providers/user_stats_provider.dart';
+import '../providers/auth_provider.dart' as core;
+import '../screens/paywall_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final stats   = context.watch<UserStatsProvider>();
-    final history = context.watch<DiagnosisHistoryProvider>();
-    final journal = context.watch<JournalProvider>();
-    final theme   = context.watch<ThemeProvider>();
+    final auth = context.watch<core.AuthProvider>();
+    final user = auth.user;
 
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Header ───────────────────────────────────────────────────
-              Row(
-                children: [
-                  ShaderMask(
-                    shaderCallback: (b) => const LinearGradient(
-                      colors: [Color(0xFFBF5AF2), Color(0xFF64D2FF)],
-                    ).createShader(b),
-                    child: const Text(
-                      'PROFILE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 4,
-                      ),
-                    ),
+        child: CustomScrollView(
+          slivers: [
+            // ── Header ─────────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+                child: const Text(
+                  'PROFILE',
+                  style: TextStyle(
+                    color:         AppColors.accent,
+                    fontSize:      13,
+                    fontWeight:    FontWeight.w800,
+                    letterSpacing: 4,
+                    fontFamily:    'Outfit',
                   ),
-                  const Spacer(),
-                  // Theme toggle
-                  GestureDetector(
-                    onTap: () => context.read<ThemeProvider>().toggle(),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      width: 52,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: theme.isDark
-                            ? AppColors.surfaceAlt
-                            : AppColors.accent.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+                ),
+              ),
+            ),
+
+            // ── Avatar card ────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color:        AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    border:       Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      // Avatar
+                      Container(
+                        width: 64, height: 64,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [AppColors.accent, Color(0xFF5E5CE6)],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:      AppColors.accent.withValues(alpha: 0.35),
+                              blurRadius: 16,
+                            ),
+                          ],
+                        ),
+                        child: user?.photoUrl != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  user!.photoUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => _InitialsAvatar(user: user),
+                                ),
+                              )
+                            : _InitialsAvatar(user: user),
                       ),
-                      child: Stack(
-                        children: [
-                          AnimatedPositioned(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeInOut,
-                            left: theme.isDark ? 2 : 26,
-                            top: 2,
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: AppColors.accent,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                theme.isDark ? Icons.dark_mode : Icons.light_mode,
-                                size: 14,
-                                color: Colors.white,
+                      const SizedBox(width: 16),
+
+                      // Name + email
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.displayName ?? 'Anonymous',
+                              style: const TextStyle(
+                                color:      AppColors.textPrimary,
+                                fontSize:   18,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Outfit',
                               ),
                             ),
-                          ),
-                        ],
+                            if (user?.email != null) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                user!.email!,
+                                style: const TextStyle(
+                                  color:    AppColors.textMuted,
+                                  fontSize: 12,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            _PremiumBadge(isPremium: auth.isPremium),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // ── Stats row ────────────────────────────────────────────────
-              const _SectionLabel('YOUR STATS'),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: '🔥',
-                      value: '${stats.streak}',
-                      label: 'Day Streak',
-                      color: const Color(0xFFFF9500),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: '⚡',
-                      value: '${stats.totalDiagnoses}',
-                      label: 'Diagnoses',
-                      color: AppColors.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: '📓',
-                      value: '${journal.journalCount}',
-                      label: 'Journal Entries',
-                      color: const Color(0xFF4A90D9),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 28),
-
-              // ── Top philosophies ─────────────────────────────────────────
-              if (history.topIsms.isNotEmpty) ...[
-                const _SectionLabel('YOUR TOP PHILOSOPHIES'),
-                const SizedBox(height: 12),
-                ...history.topIsms.asMap().entries.map((entry) {
-                  final rank  = entry.key + 1;
-                  final ism   = entry.value;
-                  return _TopIsmRow(rank: rank, name: ism.key, count: ism.value);
-                }),
-                const SizedBox(height: 28),
-              ],
-
-              // ── Recent diagnoses ─────────────────────────────────────────
-              if (history.history.isNotEmpty) ...[
-                const _SectionLabel('RECENT DIAGNOSES'),
-                const SizedBox(height: 12),
-                ...history.history.take(5).map((e) => _HistoryTile(entry: e)),
-                const SizedBox(height: 28),
-              ],
-
-              // ── Settings ─────────────────────────────────────────────────
-              const _SectionLabel('SETTINGS'),
-              const SizedBox(height: 12),
-
-              _SettingsTile(
-                icon: Icons.delete_sweep_outlined,
-                label: 'Clear diagnosis history',
-                color: const Color(0xFFFF9500),
-                onTap: () => _confirmClear(
-                  context,
-                  title: 'Clear history?',
-                  body: 'Your diagnosis history will be deleted. Journal and stats are kept.',
-                  onConfirm: () => context.read<DiagnosisHistoryProvider>().clear(),
                 ),
               ),
-              const SizedBox(height: 8),
-              _SettingsTile(
-                icon: Icons.delete_forever_outlined,
-                label: 'Clear all data',
-                color: const Color(0xFFFF3B30),
-                onTap: () => _confirmClear(
-                  context,
-                  title: 'Clear everything?',
-                  body: 'This deletes all diagnoses, journal entries, and resets your stats. This cannot be undone.',
-                  onConfirm: () async {
-                    await context.read<DiagnosisHistoryProvider>().clear();
-                    await context.read<JournalProvider>().clear();
-                    await context.read<UserStatsProvider>().clearAll();
-                  },
+            ),
+
+            // ── Premium upgrade banner (free users) ────────────────────────
+            if (!auth.isPremium)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: _UpgradeBanner(),
                 ),
               ),
 
-              const SizedBox(height: 40),
+            // ── Stats row ──────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: _StatsRow(user: user),
+              ),
+            ),
 
-              // ── App info ──────────────────────────────────────────────────
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'CORE',
-                      style: TextStyle(
-                        color: AppColors.accent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 4,
-                      ),
+            // ── Quiz result ────────────────────────────────────────────────
+            if (user?.quizResult != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: _QuizResultCard(result: user!.quizResult!),
+                ),
+              ),
+
+            // ── Settings section ───────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: _SectionLabel('ACCOUNT'),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: _SettingsTile(
+                  items: [
+                    _SettingsItem(
+                      icon:    Icons.star_rounded,
+                      color:   AppColors.gold,
+                      label:   auth.isPremium ? 'CORE Premium — Active' : 'Upgrade to Premium',
+                      onTap:   auth.isPremium ? null : () => _openPaywall(context),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'v0.1 · Philosophical coaching for warriors',
-                      style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                    _SettingsItem(
+                      icon:    Icons.restore_rounded,
+                      color:   AppColors.teal,
+                      label:   'Restore purchases',
+                      onTap:   () => _restorePurchases(context, auth),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: _SectionLabel('LEGAL'),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: _SettingsTile(
+                  items: [
+                    _SettingsItem(
+                      icon:  Icons.privacy_tip_outlined,
+                      color: AppColors.textMuted,
+                      label: 'Privacy Policy',
+                      onTap: () {},
+                    ),
+                    _SettingsItem(
+                      icon:  Icons.description_outlined,
+                      color: AppColors.textMuted,
+                      label: 'Terms of Service',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Sign out ───────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+                child: GestureDetector(
+                  onTap: () => _confirmSignOut(context, auth),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color:        AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border:       Border.all(
+                        color: const Color(0xFFFF3B30).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.logout_rounded, color: Color(0xFFFF3B30), size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          'Sign out',
+                          style: TextStyle(
+                            color:      Color(0xFFFF3B30),
+                            fontSize:   14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _confirmClear(
-    BuildContext context, {
-    required String title,
-    required String body,
-    required VoidCallback onConfirm,
-  }) async {
+  void _openPaywall(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.92,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: PaywallScreen(triggerReason: 'Unlock everything'),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _restorePurchases(BuildContext context, core.AuthProvider auth) async {
+    try {
+      await auth.syncPremiumStatus();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              auth.isPremium ? 'Premium restored!' : 'No active subscription found.',
+            ),
+            backgroundColor: AppColors.surface,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _confirmSignOut(BuildContext context, core.AuthProvider auth) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(title,
-            style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-        content: Text(body,
-            style: const TextStyle(color: AppColors.textSecondary, height: 1.5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Sign out?',
+          style: TextStyle(color: AppColors.textPrimary, fontFamily: 'Outfit'),
+        ),
+        content: const Text(
+          'Your journal and progress are saved to your account.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -226,251 +289,413 @@ class ProfileScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Color(0xFFFF3B30))),
+            child: const Text('Sign out', style: TextStyle(color: Color(0xFFFF3B30))),
           ),
         ],
       ),
     );
+    if (confirmed == true) auth.signOut();
+  }
+}
 
-    if (confirmed == true && context.mounted) {
-      onConfirm();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Done.'),
-          backgroundColor: AppColors.surface,
-          behavior: SnackBarBehavior.floating,
+// ── Sub-widgets ────────────────────────────────────────────────────────────────
+
+class _InitialsAvatar extends StatelessWidget {
+  final dynamic user;
+  const _InitialsAvatar({this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (user?.displayName ?? 'U') as String;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    return Center(
+      child: Text(
+        initial,
+        style: const TextStyle(
+          color:      Colors.white,
+          fontSize:   24,
+          fontWeight: FontWeight.w800,
+          fontFamily: 'Outfit',
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumBadge extends StatelessWidget {
+  final bool isPremium;
+  const _PremiumBadge({required this.isPremium});
+
+  @override
+  Widget build(BuildContext context) {
+    if (isPremium) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFD700), Color(0xFFFF9500)],
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.star_rounded, color: Colors.white, size: 11),
+            SizedBox(width: 4),
+            Text(
+              'PREMIUM',
+              style: TextStyle(
+                color:         Colors.white,
+                fontSize:      10,
+                fontWeight:    FontWeight.w800,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
         ),
       );
     }
-  }
-}
-
-// ── Section label ──────────────────────────────────────────────────────────────
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: AppColors.textMuted,
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 2,
-      ),
-    );
-  }
-}
-
-// ── Stat card ──────────────────────────────────────────────────────────────────
-
-class _StatCard extends StatelessWidget {
-  final String icon;
-  final String value;
-  final String label;
-  final Color  color;
-
-  const _StatCard({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        color:        AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(20),
+        border:       Border.all(color: AppColors.border),
       ),
-      child: Column(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 22)),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: const Text(
+        'FREE',
+        style: TextStyle(
+          color:         AppColors.textMuted,
+          fontSize:      10,
+          fontWeight:    FontWeight.w700,
+          letterSpacing: 1.5,
+        ),
       ),
     );
   }
 }
 
-// ── Top ism row ────────────────────────────────────────────────────────────────
-
-class _TopIsmRow extends StatelessWidget {
-  final int    rank;
-  final String name;
-  final int    count;
-
-  const _TopIsmRow({required this.rank, required this.name, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceAlt),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 24,
-            child: Text(
-              '#$rank',
-              style: TextStyle(
-                color: rank == 1 ? const Color(0xFFFFD700) : AppColors.textMuted,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              name,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Text(
-            '$count× matched',
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── History tile ───────────────────────────────────────────────────────────────
-
-class _HistoryTile extends StatelessWidget {
-  final dynamic entry;
-
-  const _HistoryTile({required this.entry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceAlt),
-      ),
-      child: Row(
-        children: [
-          Text(entry.result.icon, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.result.philosophy,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  entry.userInput,
-                  style: const TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 11,
-                    height: 1.4,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _formatDate(entry.timestamp),
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    if (diff.inDays == 0) return 'Today';
-    if (diff.inDays == 1) return 'Yesterday';
-    return '${diff.inDays}d ago';
-  }
-}
-
-// ── Settings tile ──────────────────────────────────────────────────────────────
-
-class _SettingsTile extends StatelessWidget {
-  final IconData icon;
-  final String   label;
-  final Color    color;
-  final VoidCallback onTap;
-
-  const _SettingsTile({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
+class _UpgradeBanner extends StatelessWidget {
+  const _UpgradeBanner();
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => SizedBox(
+          height: MediaQuery.of(context).size.height * 0.92,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            child: PaywallScreen(triggerReason: 'Upgrade from profile'),
+          ),
+        ),
+      ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.accent.withValues(alpha: 0.18),
+              const Color(0xFF5E5CE6).withValues(alpha: 0.1),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.accent.withValues(alpha: 0.35)),
         ),
         child: Row(
           children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+            Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFF9500)]),
+              ),
+              child: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upgrade to CORE Premium',
+                    style: TextStyle(
+                      color:      AppColors.textPrimary,
+                      fontSize:   14,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Outfit',
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Unlimited AI · All 12 perspectives · ₹249/month',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                  ),
+                ],
               ),
             ),
-            const Spacer(),
-            Icon(Icons.chevron_right_rounded, color: color.withValues(alpha: 0.5), size: 18),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.accent, size: 20),
           ],
         ),
       ),
     );
   }
+}
+
+class _StatsRow extends StatelessWidget {
+  final dynamic user;
+  const _StatsRow({this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = user?.remainingAiMessages as int? ?? 5;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _StatTile(
+            icon:  Icons.chat_bubble_outline_rounded,
+            color: AppColors.accent,
+            label: 'AI messages left',
+            value: user?.isPremium == true ? '∞' : '$remaining',
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _StatTile(
+            icon:  Icons.auto_stories_outlined,
+            color: AppColors.teal,
+            label: 'Philosophies',
+            value: '12',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  final IconData icon;
+  final Color    color;
+  final String   label;
+  final String   value;
+
+  const _StatTile({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color:        AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border:       Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(
+              color:      color,
+              fontSize:   24,
+              fontWeight: FontWeight.w800,
+              fontFamily: 'Outfit',
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuizResultCard extends StatelessWidget {
+  final Map<String, double> result;
+  const _QuizResultCard({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = result.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final top = sorted.take(3).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color:        AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border:       Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.psychology_rounded, color: AppColors.accent, size: 18),
+              const SizedBox(width: 8),
+              const Text(
+                'Your Philosophy Profile',
+                style: TextStyle(
+                  color:      AppColors.textPrimary,
+                  fontSize:   15,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Outfit',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...top.asMap().entries.map((e) {
+            final rank    = e.key;
+            final entry   = e.value;
+            final pct     = entry.value;
+            final medals  = ['🥇', '🥈', '🥉'];
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(medals[rank], style: const TextStyle(fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Text(
+                        entry.key,
+                        style: const TextStyle(
+                          color:      AppColors.textPrimary,
+                          fontSize:   13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${(pct * 100).round()}%',
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value:            pct,
+                      minHeight:        4,
+                      backgroundColor:  AppColors.surfaceAlt,
+                      valueColor:       const AlwaysStoppedAnimation(AppColors.accent),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color:         AppColors.textMuted,
+        fontSize:      11,
+        fontWeight:    FontWeight.w700,
+        letterSpacing: 1.5,
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  final List<_SettingsItem> items;
+  const _SettingsTile({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color:        AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border:       Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: items.asMap().entries.map((e) {
+          final i    = e.key;
+          final item = e.value;
+          return Column(
+            children: [
+              GestureDetector(
+                onTap: item.onTap,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 34, height: 34,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: item.color.withValues(alpha: 0.12),
+                        ),
+                        child: Icon(item.icon, color: item.color, size: 16),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          item.label,
+                          style: const TextStyle(
+                            color:    AppColors.textPrimary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 18),
+                    ],
+                  ),
+                ),
+              ),
+              if (i < items.length - 1)
+                Divider(height: 1, color: AppColors.border),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _SettingsItem {
+  final IconData    icon;
+  final Color       color;
+  final String      label;
+  final VoidCallback? onTap;
+
+  const _SettingsItem({
+    required this.icon,
+    required this.color,
+    required this.label,
+    this.onTap,
+  });
 }
