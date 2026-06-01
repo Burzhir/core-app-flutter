@@ -4,9 +4,13 @@ import '../core/app_colors.dart';
 import '../providers/auth_provider.dart' as core;
 import '../screens/paywall_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<core.AuthProvider>();
@@ -18,17 +22,17 @@ class ProfileScreen extends StatelessWidget {
         child: CustomScrollView(
           slivers: [
             // ── Header ─────────────────────────────────────────────────────
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                child: const Text(
+                padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
+                child: Text(
                   'PROFILE',
                   style: TextStyle(
-                    color:         AppColors.accent,
-                    fontSize:      13,
-                    fontWeight:    FontWeight.w800,
+                    color: AppColors.accent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 4,
-                    fontFamily:    'Outfit',
+                    fontFamily: 'Outfit',
                   ),
                 ),
               ),
@@ -41,15 +45,16 @@ class ProfileScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color:        AppColors.surface,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(24),
-                    border:       Border.all(color: AppColors.border),
+                    border: Border.all(color: AppColors.border),
                   ),
                   child: Row(
                     children: [
                       // Avatar
                       Container(
-                        width: 64, height: 64,
+                        width: 64,
+                        height: 64,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: const LinearGradient(
@@ -57,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color:      AppColors.accent.withValues(alpha: 0.35),
+                              color: AppColors.accent.withValues(alpha: 0.35),
                               blurRadius: 16,
                             ),
                           ],
@@ -67,7 +72,8 @@ class ProfileScreen extends StatelessWidget {
                                 child: Image.network(
                                   user!.photoUrl!,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => _InitialsAvatar(user: user),
+                                  errorBuilder: (_, __, ___) =>
+                                      _InitialsAvatar(user: user),
                                 ),
                               )
                             : _InitialsAvatar(user: user),
@@ -82,8 +88,8 @@ class ProfileScreen extends StatelessWidget {
                             Text(
                               user?.displayName ?? 'Anonymous',
                               style: const TextStyle(
-                                color:      AppColors.textPrimary,
-                                fontSize:   18,
+                                color: AppColors.textPrimary,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 fontFamily: 'Outfit',
                               ),
@@ -93,7 +99,7 @@ class ProfileScreen extends StatelessWidget {
                               Text(
                                 user!.email!,
                                 style: const TextStyle(
-                                  color:    AppColors.textMuted,
+                                  color: AppColors.textMuted,
                                   fontSize: 12,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -112,9 +118,9 @@ class ProfileScreen extends StatelessWidget {
 
             // ── Premium upgrade banner (free users) ────────────────────────
             if (!auth.isPremium)
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
                   child: _UpgradeBanner(),
                 ),
               ),
@@ -137,9 +143,9 @@ class ProfileScreen extends StatelessWidget {
               ),
 
             // ── Settings section ───────────────────────────────────────────
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: _SectionLabel('ACCOUNT'),
               ),
             ),
@@ -150,45 +156,48 @@ class ProfileScreen extends StatelessWidget {
                 child: _SettingsTile(
                   items: [
                     _SettingsItem(
-                      icon:    Icons.star_rounded,
-                      color:   AppColors.gold,
-                      label:   auth.isPremium ? 'CORE Premium — Active' : 'Upgrade to Premium',
-                      onTap:   auth.isPremium ? null : () => _openPaywall(context),
+                      icon: Icons.star_rounded,
+                      color: AppColors.gold,
+                      label: auth.isPremium
+                          ? 'CORE Premium — Active'
+                          : 'Upgrade to Premium',
+                      onTap:
+                          auth.isPremium ? null : () => _openPaywall(context),
                     ),
                     _SettingsItem(
-                      icon:    Icons.restore_rounded,
-                      color:   AppColors.teal,
-                      label:   'Restore purchases',
-                      onTap:   () => _restorePurchases(context, auth),
+                      icon: Icons.restore_rounded,
+                      color: AppColors.teal,
+                      label: 'Restore purchases',
+                      onTap: () => _restorePurchases(context, auth),
                     ),
                   ],
                 ),
               ),
             ),
 
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: _SectionLabel('LEGAL'),
               ),
             ),
 
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: _SettingsTile(
                   items: [
                     _SettingsItem(
-                      icon:  Icons.privacy_tip_outlined,
+                      icon: Icons.privacy_tip_outlined,
                       color: AppColors.textMuted,
                       label: 'Privacy Policy',
-                      onTap: () {},
+                      onTap: null,
                     ),
                     _SettingsItem(
-                      icon:  Icons.description_outlined,
+                      icon: Icons.description_outlined,
                       color: AppColors.textMuted,
                       label: 'Terms of Service',
-                      onTap: () {},
+                      onTap: null,
                     ),
                   ],
                 ),
@@ -204,22 +213,23 @@ class ProfileScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color:        AppColors.surface,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
-                      border:       Border.all(
+                      border: Border.all(
                         color: const Color(0xFFFF3B30).withValues(alpha: 0.3),
                       ),
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.logout_rounded, color: Color(0xFFFF3B30), size: 18),
+                        Icon(Icons.logout_rounded,
+                            color: Color(0xFFFF3B30), size: 18),
                         SizedBox(width: 8),
                         Text(
                           'Sign out',
                           style: TextStyle(
-                            color:      Color(0xFFFF3B30),
-                            fontSize:   14,
+                            color: Color(0xFFFF3B30),
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -242,33 +252,38 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.92,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: const ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           child: PaywallScreen(triggerReason: 'Unlock everything'),
         ),
       ),
     );
   }
 
-  Future<void> _restorePurchases(BuildContext context, core.AuthProvider auth) async {
+  Future<void> _restorePurchases(
+      BuildContext context, core.AuthProvider auth) async {
     try {
       await auth.syncPremiumStatus();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              auth.isPremium ? 'Premium restored!' : 'No active subscription found.',
+              auth.isPremium
+                  ? 'Premium restored!'
+                  : 'No active subscription found.',
             ),
             backgroundColor: AppColors.surface,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
     } catch (_) {}
   }
 
-  Future<void> _confirmSignOut(BuildContext context, core.AuthProvider auth) async {
+  Future<void> _confirmSignOut(
+      BuildContext context, core.AuthProvider auth) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -285,11 +300,13 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textMuted)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sign out', style: TextStyle(color: Color(0xFFFF3B30))),
+            child: const Text('Sign out',
+                style: TextStyle(color: Color(0xFFFF3B30))),
           ),
         ],
       ),
@@ -312,8 +329,8 @@ class _InitialsAvatar extends StatelessWidget {
       child: Text(
         initial,
         style: const TextStyle(
-          color:      Colors.white,
-          fontSize:   24,
+          color: Colors.white,
+          fontSize: 24,
           fontWeight: FontWeight.w800,
           fontFamily: 'Outfit',
         ),
@@ -345,9 +362,9 @@ class _PremiumBadge extends StatelessWidget {
             Text(
               'PREMIUM',
               style: TextStyle(
-                color:         Colors.white,
-                fontSize:      10,
-                fontWeight:    FontWeight.w800,
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
               ),
             ),
@@ -358,16 +375,16 @@ class _PremiumBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color:        AppColors.surfaceAlt,
+        color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border),
       ),
       child: const Text(
         'FREE',
         style: TextStyle(
-          color:         AppColors.textMuted,
-          fontSize:      10,
-          fontWeight:    FontWeight.w700,
+          color: AppColors.textMuted,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
           letterSpacing: 1.5,
         ),
       ),
@@ -387,8 +404,8 @@ class _UpgradeBanner extends StatelessWidget {
         backgroundColor: Colors.transparent,
         builder: (_) => SizedBox(
           height: MediaQuery.of(context).size.height * 0.92,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: const ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             child: PaywallScreen(triggerReason: 'Upgrade from profile'),
           ),
         ),
@@ -405,26 +422,30 @@ class _UpgradeBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.accent.withValues(alpha: 0.35)),
         ),
-        child: Row(
+        child: const Row(
           children: [
-            Container(
-              width: 40, height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFF9500)]),
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                      colors: [Color(0xFFFFD700), Color(0xFFFF9500)]),
+                ),
+                child: Icon(Icons.star_rounded, color: Colors.white, size: 20),
               ),
-              child: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
             ),
-            const SizedBox(width: 14),
-            const Expanded(
+            SizedBox(width: 14),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Upgrade to CORE Premium',
                     style: TextStyle(
-                      color:      AppColors.textPrimary,
-                      fontSize:   14,
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'Outfit',
                     ),
@@ -437,7 +458,8 @@ class _UpgradeBanner extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.accent, size: 20),
+            Icon(Icons.chevron_right_rounded,
+                color: AppColors.accent, size: 20),
           ],
         ),
       ),
@@ -457,16 +479,16 @@ class _StatsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatTile(
-            icon:  Icons.chat_bubble_outline_rounded,
+            icon: Icons.chat_bubble_outline_rounded,
             color: AppColors.accent,
             label: 'AI messages left',
             value: user?.isPremium == true ? '∞' : '$remaining',
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
+        const Expanded(
           child: _StatTile(
-            icon:  Icons.auto_stories_outlined,
+            icon: Icons.auto_stories_outlined,
             color: AppColors.teal,
             label: 'Philosophies',
             value: '12',
@@ -479,9 +501,9 @@ class _StatsRow extends StatelessWidget {
 
 class _StatTile extends StatelessWidget {
   final IconData icon;
-  final Color    color;
-  final String   label;
-  final String   value;
+  final Color color;
+  final String label;
+  final String value;
 
   const _StatTile({
     required this.icon,
@@ -495,9 +517,9 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:        AppColors.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border:       Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,8 +529,8 @@ class _StatTile extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              color:      color,
-              fontSize:   24,
+              color: color,
+              fontSize: 24,
               fontWeight: FontWeight.w800,
               fontFamily: 'Outfit',
             ),
@@ -537,22 +559,22 @@ class _QuizResultCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color:        AppColors.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.psychology_rounded, color: AppColors.accent, size: 18),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(Icons.psychology_rounded, color: AppColors.accent, size: 18),
+              SizedBox(width: 8),
+              Text(
                 'Your Philosophy Profile',
                 style: TextStyle(
-                  color:      AppColors.textPrimary,
-                  fontSize:   15,
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Outfit',
                 ),
@@ -561,10 +583,10 @@ class _QuizResultCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ...top.asMap().entries.map((e) {
-            final rank    = e.key;
-            final entry   = e.value;
-            final pct     = entry.value;
-            final medals  = ['🥇', '🥈', '🥉'];
+            final rank = e.key;
+            final entry = e.value;
+            final pct = entry.value;
+            const medals = ['🥇', '🥈', '🥉'];
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -578,15 +600,16 @@ class _QuizResultCard extends StatelessWidget {
                       Text(
                         entry.key,
                         style: const TextStyle(
-                          color:      AppColors.textPrimary,
-                          fontSize:   13,
+                          color: AppColors.textPrimary,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const Spacer(),
                       Text(
                         '${(pct * 100).round()}%',
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                        style: const TextStyle(
+                            color: AppColors.textMuted, fontSize: 12),
                       ),
                     ],
                   ),
@@ -594,10 +617,11 @@ class _QuizResultCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value:            pct,
-                      minHeight:        4,
-                      backgroundColor:  AppColors.surfaceAlt,
-                      valueColor:       const AlwaysStoppedAnimation(AppColors.accent),
+                      value: pct,
+                      minHeight: 4,
+                      backgroundColor: AppColors.surfaceAlt,
+                      valueColor:
+                          const AlwaysStoppedAnimation(AppColors.accent),
                     ),
                   ),
                 ],
@@ -619,9 +643,9 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       label,
       style: const TextStyle(
-        color:         AppColors.textMuted,
-        fontSize:      11,
-        fontWeight:    FontWeight.w700,
+        color: AppColors.textMuted,
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
         letterSpacing: 1.5,
       ),
     );
@@ -636,13 +660,13 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color:        AppColors.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border:       Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: items.asMap().entries.map((e) {
-          final i    = e.key;
+          final i = e.key;
           final item = e.value;
           return Column(
             children: [
@@ -650,11 +674,13 @@ class _SettingsTile extends StatelessWidget {
                 onTap: item.onTap,
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
                   child: Row(
                     children: [
                       Container(
-                        width: 34, height: 34,
+                        width: 34,
+                        height: 34,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: item.color.withValues(alpha: 0.12),
@@ -666,18 +692,19 @@ class _SettingsTile extends StatelessWidget {
                         child: Text(
                           item.label,
                           style: const TextStyle(
-                            color:    AppColors.textPrimary,
+                            color: AppColors.textPrimary,
                             fontSize: 14,
                           ),
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 18),
+                      const Icon(Icons.chevron_right_rounded,
+                          color: AppColors.textMuted, size: 18),
                     ],
                   ),
                 ),
               ),
               if (i < items.length - 1)
-                Divider(height: 1, color: AppColors.border),
+                const Divider(height: 1, color: AppColors.border),
             ],
           );
         }).toList(),
@@ -687,9 +714,9 @@ class _SettingsTile extends StatelessWidget {
 }
 
 class _SettingsItem {
-  final IconData    icon;
-  final Color       color;
-  final String      label;
+  final IconData icon;
+  final Color color;
+  final String label;
   final VoidCallback? onTap;
 
   const _SettingsItem({

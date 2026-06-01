@@ -15,16 +15,18 @@ class AiChatScreen extends StatefulWidget {
 }
 
 class _AiChatScreenState extends State<AiChatScreen> {
-  final _controller  = TextEditingController();
-  final _scrollCtrl  = ScrollController();
-  final _focusNode   = FocusNode();
+  final _controller = TextEditingController();
+  final _scrollCtrl = ScrollController();
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     if (widget.initialPhilosophy != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<AiChatProvider>().selectPhilosophy(widget.initialPhilosophy!);
+        context
+            .read<AiChatProvider>()
+            .selectPhilosophy(widget.initialPhilosophy!);
       });
     }
   }
@@ -100,15 +102,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
         backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 18),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.textPrimary, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
         title: chat.selectedPhilosophy == null
             ? const Text(
                 'AI Philosopher',
                 style: TextStyle(
-                  color:      AppColors.textPrimary,
-                  fontSize:   17,
+                  color: AppColors.textPrimary,
+                  fontSize: 17,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Outfit',
                 ),
@@ -118,7 +121,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
         actions: [
           if (chat.hasConversation)
             IconButton(
-              icon: const Icon(Icons.refresh_rounded, color: AppColors.textMuted, size: 20),
+              icon: const Icon(Icons.refresh_rounded,
+                  color: AppColors.textMuted, size: 20),
               tooltip: 'New conversation',
               onPressed: () => chat.clearConversation(),
             ),
@@ -128,7 +132,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
         children: [
           // Quota bar
           if (!auth.isPremium && auth.user != null)
-            _QuotaBar(user: auth.user!, onUpgrade: () => _openPaywall('Get unlimited AI messages')),
+            _QuotaBar(
+                user: auth.user!,
+                onUpgrade: () => _openPaywall('Get unlimited AI messages')),
 
           // Philosophy selector (shown when no philosophy is selected OR as a top picker)
           if (chat.selectedPhilosophy == null)
@@ -147,11 +153,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
           if (chat.selectedPhilosophy != null)
             _ChatInput(
               controller: _controller,
-              focusNode:  _focusNode,
-              isLoading:  chat.isLoading,
-              canSend:    auth.user?.canSendAiMessage ?? true,
-              onSend:     _send,
-              onUpgrade:  () => _openPaywall('Get unlimited AI messages'),
+              focusNode: _focusNode,
+              isLoading: chat.isLoading,
+              canSend: auth.user?.canSendAiMessage ?? true,
+              onSend: _send,
+              onUpgrade: () => _openPaywall('Get unlimited AI messages'),
             ),
         ],
       ),
@@ -178,8 +184,8 @@ class _PhilosopherChip extends StatelessWidget {
         Text(
           name,
           style: const TextStyle(
-            color:      AppColors.textPrimary,
-            fontSize:   15,
+            color: AppColors.textPrimary,
+            fontSize: 15,
             fontWeight: FontWeight.w700,
             fontFamily: 'Outfit',
           ),
@@ -199,7 +205,7 @@ class _QuotaBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final remaining = user.remainingAiMessages as int;
-    final pct       = remaining / 5.0;
+    final pct = remaining / 5.0;
     final color = pct > 0.4
         ? AppColors.teal
         : pct > 0.2
@@ -210,8 +216,8 @@ class _QuotaBar extends StatelessWidget {
       onTap: remaining == 0 ? onUpgrade : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color:  AppColors.surface,
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
           border: Border(bottom: BorderSide(color: AppColors.border)),
         ),
         child: Row(
@@ -222,15 +228,16 @@ class _QuotaBar extends StatelessWidget {
               remaining == 0
                   ? 'Daily limit reached'
                   : '$remaining free message${remaining == 1 ? '' : 's'} left today',
-              style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: color, fontSize: 11, fontWeight: FontWeight.w600),
             ),
             const Spacer(),
             if (remaining == 0)
               Text(
                 'Upgrade ↗',
                 style: TextStyle(
-                  color:      color,
-                  fontSize:   11,
+                  color: color,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -251,25 +258,28 @@ class _PhilosophyPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
+        const SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 6),
+            padding: EdgeInsets.fromLTRB(24, 20, 24, 6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Choose a philosopher',
                   style: TextStyle(
-                    color:      AppColors.textPrimary,
-                    fontSize:   22,
+                    color: AppColors.textPrimary,
+                    fontSize: 22,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Outfit',
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Text(
                   'Each philosopher responds from within their philosophy — not as an encyclopedia, but as a living voice.',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
+                  style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      height: 1.5),
                 ),
               ],
             ),
@@ -288,14 +298,15 @@ class _PhilosophyPicker extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color:        AppColors.surface,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border:       Border.all(color: AppColors.border),
+                        border: Border.all(color: AppColors.border),
                       ),
                       child: Row(
                         children: [
                           Container(
-                            width: 42, height: 42,
+                            width: 42,
+                            height: 42,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: LinearGradient(
@@ -306,7 +317,8 @@ class _PhilosophyPicker extends StatelessWidget {
                               ),
                             ),
                             child: Center(
-                              child: Text(p.emoji, style: const TextStyle(fontSize: 20)),
+                              child: Text(p.emoji,
+                                  style: const TextStyle(fontSize: 20)),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -317,8 +329,8 @@ class _PhilosophyPicker extends StatelessWidget {
                                 Text(
                                   p.name,
                                   style: const TextStyle(
-                                    color:      AppColors.textPrimary,
-                                    fontSize:   14,
+                                    color: AppColors.textPrimary,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     fontFamily: 'Outfit',
                                   ),
@@ -327,7 +339,7 @@ class _PhilosophyPicker extends StatelessWidget {
                                 Text(
                                   p.tagline,
                                   style: const TextStyle(
-                                    color:    AppColors.textMuted,
+                                    color: AppColors.textMuted,
                                     fontSize: 11,
                                   ),
                                   maxLines: 1,
@@ -336,7 +348,8 @@ class _PhilosophyPicker extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 18),
+                          const Icon(Icons.chevron_right_rounded,
+                              color: AppColors.textMuted, size: 18),
                         ],
                       ),
                     ),
@@ -404,38 +417,43 @@ class _EmptyChat extends StatelessWidget {
         children: [
           const SizedBox(height: 20),
           Container(
-            width: 72, height: 72,
+            width: 72,
+            height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: p != null
                   ? LinearGradient(colors: p.gradient)
-                  : const LinearGradient(colors: [AppColors.accent, Color(0xFF5E5CE6)]),
+                  : const LinearGradient(
+                      colors: [AppColors.accent, Color(0xFF5E5CE6)]),
               boxShadow: [
                 BoxShadow(
-                  color:      (p?.gradient[0] ?? AppColors.accent).withValues(alpha: 0.35),
+                  color: (p?.gradient[0] ?? AppColors.accent)
+                      .withValues(alpha: 0.35),
                   blurRadius: 20,
                 ),
               ],
             ),
             child: Center(
-              child: Text(p?.emoji ?? '💬', style: const TextStyle(fontSize: 32)),
+              child:
+                  Text(p?.emoji ?? '💬', style: const TextStyle(fontSize: 32)),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'Talking with $philosophyName',
             style: const TextStyle(
-              color:      AppColors.textPrimary,
-              fontSize:   18,
+              color: AppColors.textPrimary,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               fontFamily: 'Outfit',
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          const Text(
             'Ask anything — about life, decisions, struggles, or ideas.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
+            style: TextStyle(
+                color: AppColors.textSecondary, fontSize: 13, height: 1.5),
           ),
           const SizedBox(height: 28),
           const Align(
@@ -443,36 +461,38 @@ class _EmptyChat extends StatelessWidget {
             child: Text(
               'STARTER QUESTIONS',
               style: TextStyle(
-                color:         AppColors.textMuted,
-                fontSize:      10,
-                fontWeight:    FontWeight.w700,
+                color: AppColors.textMuted,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 1.5,
               ),
             ),
           ),
           const SizedBox(height: 10),
           ..._starters.map((s) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: GestureDetector(
-              onTap: () {
-                final auth = context.read<core.AuthProvider>();
-                chat.sendMessage(text: s, user: auth.user);
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color:        AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border:       Border.all(color: AppColors.border),
+                padding: const EdgeInsets.only(bottom: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    final auth = context.read<core.AuthProvider>();
+                    chat.sendMessage(text: s, user: auth.user);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Text(
+                      s,
+                      style: const TextStyle(
+                          color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                  ),
                 ),
-                child: Text(
-                  s,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-              ),
-            ),
-          )),
+              )),
         ],
       ),
     );
@@ -490,19 +510,23 @@ class _MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isUser) ...[
             Container(
-              width: 28, height: 28,
+              width: 28,
+              height: 28,
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.accentSoft,
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
               ),
-              child: const Icon(Icons.psychology_alt_rounded, color: AppColors.accent, size: 14),
+              child: const Icon(Icons.psychology_alt_rounded,
+                  color: AppColors.accent, size: 14),
             ),
           ],
           Flexible(
@@ -513,9 +537,9 @@ class _MessageBubble extends StatelessWidget {
                     ? AppColors.accent.withValues(alpha: 0.18)
                     : AppColors.surface,
                 borderRadius: BorderRadius.only(
-                  topLeft:     const Radius.circular(18),
-                  topRight:    const Radius.circular(18),
-                  bottomLeft:  Radius.circular(isUser ? 18 : 4),
+                  topLeft: const Radius.circular(18),
+                  topRight: const Radius.circular(18),
+                  bottomLeft: Radius.circular(isUser ? 18 : 4),
                   bottomRight: Radius.circular(isUser ? 4 : 18),
                 ),
                 border: Border.all(
@@ -527,9 +551,10 @@ class _MessageBubble extends StatelessWidget {
               child: Text(
                 message.text,
                 style: TextStyle(
-                  color:    isUser ? AppColors.textPrimary : AppColors.textSecondary,
+                  color:
+                      isUser ? AppColors.textPrimary : AppColors.textSecondary,
                   fontSize: 14,
-                  height:   1.55,
+                  height: 1.55,
                 ),
               ),
             ),
@@ -551,24 +576,27 @@ class _TypingBubble extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 28, height: 28,
+            width: 28,
+            height: 28,
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.accentSoft,
-              border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+              border:
+                  Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
             ),
-            child: const Icon(Icons.psychology_alt_rounded, color: AppColors.accent, size: 14),
+            child: const Icon(Icons.psychology_alt_rounded,
+                color: AppColors.accent, size: 14),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color:        AppColors.surface,
+              color: AppColors.surface,
               borderRadius: const BorderRadius.only(
-                topLeft:     Radius.circular(18),
-                topRight:    Radius.circular(18),
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
                 bottomRight: Radius.circular(18),
-                bottomLeft:  Radius.circular(4),
+                bottomLeft: Radius.circular(4),
               ),
               border: Border.all(color: AppColors.border),
             ),
@@ -593,12 +621,13 @@ class _Dot extends StatefulWidget {
 
 class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final Animation<double>    _anim;
+  late final Animation<double> _anim;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600))
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600))
       ..repeat(reverse: true);
     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
     Future.delayed(Duration(milliseconds: widget.delay), () {
@@ -619,7 +648,8 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
       child: FadeTransition(
         opacity: _anim,
         child: Container(
-          width: 6, height: 6,
+          width: 6,
+          height: 6,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             color: AppColors.textMuted,
@@ -634,11 +664,11 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
 
 class _ChatInput extends StatelessWidget {
   final TextEditingController controller;
-  final FocusNode             focusNode;
-  final bool                  isLoading;
-  final bool                  canSend;
-  final VoidCallback          onSend;
-  final VoidCallback          onUpgrade;
+  final FocusNode focusNode;
+  final bool isLoading;
+  final bool canSend;
+  final VoidCallback onSend;
+  final VoidCallback onUpgrade;
 
   const _ChatInput({
     required this.controller,
@@ -653,9 +683,10 @@ class _ChatInput extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!canSend) {
       return Container(
-        padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
-        decoration: BoxDecoration(
-          color:  AppColors.surface,
+        padding: EdgeInsets.fromLTRB(
+            16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
         child: GestureDetector(
@@ -663,15 +694,16 @@ class _ChatInput extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppColors.accent, Color(0xFF5E5CE6)]),
+              gradient: const LinearGradient(
+                  colors: [AppColors.accent, Color(0xFF5E5CE6)]),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Center(
               child: Text(
                 'Upgrade for unlimited messages',
                 style: TextStyle(
-                  color:      Colors.white,
-                  fontSize:   14,
+                  color: Colors.white,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -682,30 +714,33 @@ class _ChatInput extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + MediaQuery.of(context).padding.bottom),
-      decoration: BoxDecoration(
-        color:  AppColors.surface,
+      padding: EdgeInsets.fromLTRB(
+          16, 10, 16, 10 + MediaQuery.of(context).padding.bottom),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              controller:  controller,
-              focusNode:   focusNode,
-              enabled:     !isLoading,
-              maxLines:    null,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+              controller: controller,
+              focusNode: focusNode,
+              enabled: !isLoading,
+              maxLines: null,
+              style:
+                  const TextStyle(color: AppColors.textPrimary, fontSize: 14),
               decoration: InputDecoration(
-                hintText:        'Ask anything…',
-                hintStyle:       const TextStyle(color: AppColors.textMuted),
-                filled:          true,
-                fillColor:       AppColors.surfaceAlt,
-                border:          OutlineInputBorder(
+                hintText: 'Ask anything…',
+                hintStyle: const TextStyle(color: AppColors.textMuted),
+                filled: true,
+                fillColor: AppColors.surfaceAlt,
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide:   BorderSide.none,
+                  borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               onSubmitted: (_) => onSend(),
               textInputAction: TextInputAction.send,
@@ -716,18 +751,20 @@ class _ChatInput extends StatelessWidget {
             onTap: isLoading ? null : onSend,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 44, height: 44,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: isLoading
                     ? null
-                    : const LinearGradient(colors: [AppColors.accent, Color(0xFF5E5CE6)]),
+                    : const LinearGradient(
+                        colors: [AppColors.accent, Color(0xFF5E5CE6)]),
                 color: isLoading ? AppColors.surfaceAlt : null,
               ),
               child: Icon(
                 Icons.arrow_upward_rounded,
-                color:  isLoading ? AppColors.textMuted : Colors.white,
-                size:   20,
+                color: isLoading ? AppColors.textMuted : Colors.white,
+                size: 20,
               ),
             ),
           ),

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../core/app_colors.dart';
-import '../providers/auth_provider.dart' as core;
-import '../screens/paywall_screen.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -32,22 +29,22 @@ class _JournalScreenState extends State<JournalScreen> {
                           Text(
                             'JOURNAL',
                             style: TextStyle(
-                              color:         AppColors.accent,
-                              fontSize:      13,
-                              fontWeight:    FontWeight.w800,
+                              color: AppColors.accent,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
                               letterSpacing: 4,
-                              fontFamily:    'Outfit',
+                              fontFamily: 'Outfit',
                             ),
                           ),
                           SizedBox(height: 6),
                           Text(
                             'Reflect & grow',
                             style: TextStyle(
-                              color:      AppColors.textPrimary,
-                              fontSize:   26,
+                              color: AppColors.textPrimary,
+                              fontSize: 26,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'Outfit',
-                              height:     1.2,
+                              height: 1.2,
                             ),
                           ),
                         ],
@@ -56,7 +53,8 @@ class _JournalScreenState extends State<JournalScreen> {
                     GestureDetector(
                       onTap: () => _openNewEntry(context),
                       child: Container(
-                        width: 44, height: 44,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: const LinearGradient(
@@ -64,13 +62,14 @@ class _JournalScreenState extends State<JournalScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color:      AppColors.accent.withValues(alpha: 0.35),
+                              color: AppColors.accent.withValues(alpha: 0.35),
                               blurRadius: 12,
-                              offset:     const Offset(0, 4),
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
+                        child: const Icon(Icons.add_rounded,
+                            color: Colors.white, size: 22),
                       ),
                     ),
                   ],
@@ -101,7 +100,7 @@ class _JournalScreenState extends State<JournalScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _NewEntrySheet(),
+      builder: (_) => const _NewEntrySheet(),
     );
   }
 }
@@ -136,7 +135,7 @@ class _DailyPromptCard extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
-            end:   Alignment.bottomRight,
+            end: Alignment.bottomRight,
             colors: [
               AppColors.accent.withValues(alpha: 0.15),
               const Color(0xFF5E5CE6).withValues(alpha: 0.08),
@@ -151,48 +150,51 @@ class _DailyPromptCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color:        AppColors.accent.withValues(alpha: 0.15),
+                    color: AppColors.accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
                     'TODAY\'S PROMPT',
                     style: TextStyle(
-                      color:         AppColors.accent,
-                      fontSize:      9,
-                      fontWeight:    FontWeight.w800,
+                      color: AppColors.accent,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
                       letterSpacing: 1.5,
                     ),
                   ),
                 ),
                 const Spacer(),
-                const Icon(Icons.edit_note_rounded, color: AppColors.accent, size: 18),
+                const Icon(Icons.edit_note_rounded,
+                    color: AppColors.accent, size: 18),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               '"$_todayPrompt"',
               style: const TextStyle(
-                color:     AppColors.textPrimary,
-                fontSize:  16,
-                height:    1.5,
+                color: AppColors.textPrimary,
+                fontSize: 16,
+                height: 1.5,
                 fontStyle: FontStyle.italic,
               ),
             ),
             const SizedBox(height: 14),
-            Row(
+            const Row(
               children: [
                 Text(
                   'Write your reflection',
                   style: TextStyle(
-                    color:      AppColors.accent,
-                    fontSize:   13,
+                    color: AppColors.accent,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, color: AppColors.accent, size: 14),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_forward_rounded,
+                    color: AppColors.accent, size: 14),
               ],
             ),
           ],
@@ -211,22 +213,22 @@ class _JournalEntriesList extends StatelessWidget {
   Widget build(BuildContext context) {
     // Placeholder: entries are stored via Firestore in the actual integration.
     // For now, show an empty state so the screen is fully functional.
-    return SliverToBoxAdapter(
+    return const SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'PAST ENTRIES',
               style: TextStyle(
-                color:         AppColors.textMuted,
-                fontSize:      11,
-                fontWeight:    FontWeight.w700,
+                color: AppColors.textMuted,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 1.5,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             _EmptyJournal(),
           ],
         ),
@@ -243,26 +245,28 @@ class _EmptyJournal extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color:        AppColors.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border:       Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
           Container(
-            width: 60, height: 60,
-            decoration: BoxDecoration(
+            width: 60,
+            height: 60,
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.accentSoft,
             ),
-            child: const Icon(Icons.book_outlined, color: AppColors.accent, size: 28),
+            child: const Icon(Icons.book_outlined,
+                color: AppColors.accent, size: 28),
           ),
           const SizedBox(height: 16),
           const Text(
             'No entries yet',
             style: TextStyle(
-              color:      AppColors.textPrimary,
-              fontSize:   16,
+              color: AppColors.textPrimary,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               fontFamily: 'Outfit',
             ),
@@ -272,9 +276,9 @@ class _EmptyJournal extends StatelessWidget {
             'Your reflections will appear here.\nStart with today\'s prompt above.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color:    AppColors.textMuted,
+              color: AppColors.textMuted,
               fontSize: 13,
-              height:   1.5,
+              height: 1.5,
             ),
           ),
         ],
@@ -311,7 +315,7 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
     return Container(
       padding: EdgeInsets.fromLTRB(0, 0, 0, bottomInset),
       decoration: const BoxDecoration(
-        color:        AppColors.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -319,10 +323,11 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
         children: [
           // Handle
           Container(
-            width: 40, height: 4,
+            width: 40,
+            height: 4,
             margin: const EdgeInsets.only(top: 12, bottom: 20),
             decoration: BoxDecoration(
-              color:        AppColors.border,
+              color: AppColors.border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -335,8 +340,8 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
               child: Text(
                 'New entry',
                 style: TextStyle(
-                  color:      AppColors.textPrimary,
-                  fontSize:   20,
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Outfit',
                 ),
@@ -355,21 +360,25 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
                   style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
                 ..._moods.map((m) => GestureDetector(
-                  onTap: () => setState(() => _mood = m),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _mood == m ? AppColors.accentSoft : Colors.transparent,
-                      border: _mood == m
-                          ? Border.all(color: AppColors.accent.withValues(alpha: 0.5))
-                          : null,
-                    ),
-                    child: Text(m, style: const TextStyle(fontSize: 22)),
-                  ),
-                )),
+                      onTap: () => setState(() => _mood = m),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _mood == m
+                              ? AppColors.accentSoft
+                              : Colors.transparent,
+                          border: _mood == m
+                              ? Border.all(
+                                  color:
+                                      AppColors.accent.withValues(alpha: 0.5))
+                              : null,
+                        ),
+                        child: Text(m, style: const TextStyle(fontSize: 22)),
+                      ),
+                    )),
               ],
             ),
           ),
@@ -379,19 +388,20 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: TextField(
-              controller:    _ctrl,
-              autofocus:     true,
-              maxLines:      8,
-              minLines:      5,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.6),
+              controller: _ctrl,
+              autofocus: true,
+              maxLines: 8,
+              minLines: 5,
+              style: const TextStyle(
+                  color: AppColors.textPrimary, fontSize: 15, height: 1.6),
               decoration: InputDecoration(
-                hintText:        'Write what\'s on your mind…',
-                hintStyle:       const TextStyle(color: AppColors.textMuted),
-                filled:          true,
-                fillColor:       AppColors.surfaceAlt,
-                border:          OutlineInputBorder(
+                hintText: 'Write what\'s on your mind…',
+                hintStyle: const TextStyle(color: AppColors.textMuted),
+                filled: true,
+                fillColor: AppColors.surfaceAlt,
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide:   BorderSide.none,
+                  borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.all(16),
               ),
@@ -405,14 +415,14 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
             child: GestureDetector(
               onTap: () {
                 if (_ctrl.text.trim().isEmpty) return;
-                // TODO: save to Firestore in production
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text('Entry saved'),
                     backgroundColor: AppColors.surface,
                     behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 );
               },
@@ -420,13 +430,14 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppColors.accent, Color(0xFF5E5CE6)]),
+                  gradient: const LinearGradient(
+                      colors: [AppColors.accent, Color(0xFF5E5CE6)]),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color:      AppColors.accent.withValues(alpha: 0.35),
+                      color: AppColors.accent.withValues(alpha: 0.35),
                       blurRadius: 16,
-                      offset:     const Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -434,8 +445,8 @@ class _NewEntrySheetState extends State<_NewEntrySheet> {
                   child: Text(
                     'Save entry',
                     style: TextStyle(
-                      color:      Colors.white,
-                      fontSize:   15,
+                      color: Colors.white,
+                      fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

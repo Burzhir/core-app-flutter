@@ -44,8 +44,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         const Text(
                           'Library',
                           style: TextStyle(
-                            color:      AppColors.textPrimary,
-                            fontSize:   28,
+                            color: AppColors.textPrimary,
+                            fontSize: 28,
                             fontWeight: FontWeight.w900,
                             fontFamily: 'Outfit',
                           ),
@@ -56,7 +56,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         Text(
                           '${kPhilosophies.length} philosophies · All free',
                           style: const TextStyle(
-                            color: AppColors.textMuted, fontSize: 13),
+                              color: AppColors.textMuted, fontSize: 13),
                         ).animate(delay: 100.ms).fadeIn(duration: 500.ms),
 
                         const SizedBox(height: 16),
@@ -65,22 +65,23 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color:        AppColors.surface,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(14),
-                            border:       Border.all(color: AppColors.border),
+                            border: Border.all(color: AppColors.border),
                           ),
                           child: TextField(
                             onChanged: (v) => setState(() => _search = v),
                             style: const TextStyle(
-                              color: AppColors.textPrimary, fontSize: 14),
+                                color: AppColors.textPrimary, fontSize: 14),
                             decoration: const InputDecoration(
                               prefixIcon: Icon(Icons.search_rounded,
                                   color: AppColors.textMuted, size: 18),
-                              hintText:        'Search philosophies…',
-                              hintStyle:       TextStyle(
+                              hintText: 'Search philosophies…',
+                              hintStyle: TextStyle(
                                   color: AppColors.textMuted, fontSize: 14),
-                              border:          InputBorder.none,
-                              contentPadding:  EdgeInsets.symmetric(vertical: 13),
+                              border: InputBorder.none,
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 13),
                             ),
                           ),
                         ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
@@ -95,8 +96,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   sliver: SliverGrid(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:   2,
-                      mainAxisSpacing:  12,
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
                       childAspectRatio: 0.85,
                     ),
@@ -113,7 +114,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           ),
                           child: _PhilosophyCard(
                             philosophy: p,
-                            delay:      i * 60,
+                            delay: i * 60,
                           ),
                         );
                       },
@@ -148,7 +149,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
 class _PhilosophyCard extends StatelessWidget {
   final PhilosophyModel philosophy;
-  final int             delay;
+  final int delay;
   const _PhilosophyCard({required this.philosophy, required this.delay});
 
   @override
@@ -183,11 +184,12 @@ class _PhilosophyCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text('FREE',
-                  style: TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 8, fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  )),
+                    style: TextStyle(
+                      color: Colors.greenAccent,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    )),
               ),
             ],
           ),
@@ -195,20 +197,21 @@ class _PhilosophyCard extends StatelessWidget {
           const SizedBox(height: 10),
 
           Text(p.name,
-            style: const TextStyle(
-              color:      AppColors.textPrimary,
-              fontSize:   15,
-              fontWeight: FontWeight.w800,
-              fontFamily: 'Outfit',
-            )),
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'Outfit',
+              )),
 
           const SizedBox(height: 4),
 
-          Text(p.tagline,
+          Text(
+            p.tagline,
             style: const TextStyle(
-              color:   AppColors.textMuted,
+              color: AppColors.textMuted,
               fontSize: 11,
-              height:  1.4,
+              height: 1.4,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -220,7 +223,7 @@ class _PhilosophyCard extends StatelessWidget {
           Text(
             p.keyThinkers.take(2).join(' · '),
             style: TextStyle(
-              color:    p.gradient[0].withValues(alpha: 0.9),
+              color: p.gradient[0].withValues(alpha: 0.9),
               fontSize: 10,
               fontWeight: FontWeight.w600,
             ),

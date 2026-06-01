@@ -14,40 +14,40 @@ class ForgeScreen extends StatelessWidget {
         child: CustomScrollView(
           slivers: [
             // ── Header ────────────────────────────────────────────────────
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
+                padding: EdgeInsets.fromLTRB(24, 28, 24, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'FORGE',
                       style: TextStyle(
-                        color:         AppColors.accent,
-                        fontSize:      13,
-                        fontWeight:    FontWeight.w800,
+                        color: AppColors.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 4,
-                        fontFamily:    'Outfit',
+                        fontFamily: 'Outfit',
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    const Text(
+                    SizedBox(height: 6),
+                    Text(
                       'Tools to think differently',
                       style: TextStyle(
-                        color:      AppColors.textPrimary,
-                        fontSize:   26,
+                        color: AppColors.textPrimary,
+                        fontSize: 26,
                         fontWeight: FontWeight.w700,
                         fontFamily: 'Outfit',
-                        height:     1.2,
+                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Text(
                       'Compare how different philosophies approach your situation, or talk directly with an AI philosopher.',
                       style: TextStyle(
-                        color:    AppColors.textSecondary,
+                        color: AppColors.textSecondary,
                         fontSize: 14,
-                        height:   1.5,
+                        height: 1.5,
                       ),
                     ),
                   ],
@@ -61,28 +61,29 @@ class ForgeScreen extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _ToolCard(
-                    icon:        Icons.compare_arrows_rounded,
-                    iconColor:   AppColors.teal,
-                    title:       'Compare Philosophies',
-                    subtitle:    'Pick a situation you\'re facing and see how Stoicism, Buddhism, Existentialism — and 9 others — would approach it.',
-                    badge:       '8 situations',
-                    badgeColor:  AppColors.teal,
+                    icon: Icons.compare_arrows_rounded,
+                    iconColor: AppColors.teal,
+                    title: 'Compare Philosophies',
+                    subtitle:
+                        'Pick a situation you\'re facing and see how Stoicism, Buddhism, Existentialism — and 9 others — would approach it.',
+                    badge: '8 situations',
+                    badgeColor: AppColors.teal,
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ComparisonScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const ComparisonScreen()),
                     ),
                     gradient: const [Color(0xFF00B4D8), Color(0xFF0077B6)],
                     preview: const _ComparePreview(),
                   ),
-
                   const SizedBox(height: 20),
-
                   _ToolCard(
-                    icon:        Icons.chat_bubble_outline_rounded,
-                    iconColor:   AppColors.accent,
-                    title:       'AI Philosopher',
-                    subtitle:    'Have a real conversation. Pick any philosophy and ask it anything — about your life, your choices, or just ideas.',
-                    badge:       '12 philosophers',
-                    badgeColor:  AppColors.accent,
+                    icon: Icons.chat_bubble_outline_rounded,
+                    iconColor: AppColors.accent,
+                    title: 'AI Philosopher',
+                    subtitle:
+                        'Have a real conversation. Pick any philosophy and ask it anything — about your life, your choices, or just ideas.',
+                    badge: '12 philosophers',
+                    badgeColor: AppColors.accent,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const AiChatScreen()),
                     ),
@@ -103,14 +104,14 @@ class ForgeScreen extends StatelessWidget {
 
 class _ToolCard extends StatelessWidget {
   final IconData icon;
-  final Color    iconColor;
-  final String   title;
-  final String   subtitle;
-  final String   badge;
-  final Color    badgeColor;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final String badge;
+  final Color badgeColor;
   final VoidCallback onTap;
-  final List<Color>  gradient;
-  final Widget       preview;
+  final List<Color> gradient;
+  final Widget preview;
 
   const _ToolCard({
     required this.icon,
@@ -135,9 +136,9 @@ class _ToolCard extends StatelessWidget {
           border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color:      gradient[0].withValues(alpha: 0.08),
+              color: gradient[0].withValues(alpha: 0.08),
               blurRadius: 20,
-              offset:     const Offset(0, 6),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -149,7 +150,8 @@ class _ToolCard extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: gradient),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
               ),
             ),
 
@@ -162,7 +164,8 @@ class _ToolCard extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 48, height: 48,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
@@ -171,23 +174,26 @@ class _ToolCard extends StatelessWidget {
                               gradient[1].withValues(alpha: 0.15),
                             ],
                           ),
-                          border: Border.all(color: gradient[0].withValues(alpha: 0.4)),
+                          border: Border.all(
+                              color: gradient[0].withValues(alpha: 0.4)),
                         ),
                         child: Icon(icon, color: iconColor, size: 22),
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+                          border: Border.all(
+                              color: badgeColor.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           badge,
                           style: TextStyle(
-                            color:      badgeColor,
-                            fontSize:   11,
+                            color: badgeColor,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.3,
                           ),
@@ -201,8 +207,8 @@ class _ToolCard extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      color:      AppColors.textPrimary,
-                      fontSize:   20,
+                      color: AppColors.textPrimary,
+                      fontSize: 20,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'Outfit',
                     ),
@@ -213,9 +219,9 @@ class _ToolCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      color:    AppColors.textSecondary,
+                      color: AppColors.textSecondary,
                       fontSize: 13,
-                      height:   1.5,
+                      height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -231,13 +237,14 @@ class _ToolCard extends StatelessWidget {
                       Text(
                         'Get started',
                         style: TextStyle(
-                          color:      gradient[0],
-                          fontSize:   13,
+                          color: gradient[0],
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_rounded, color: gradient[0], size: 16),
+                      Icon(Icons.arrow_forward_rounded,
+                          color: gradient[0], size: 16),
                     ],
                   ),
                 ],
@@ -255,7 +262,11 @@ class _ToolCard extends StatelessWidget {
 class _ComparePreview extends StatelessWidget {
   const _ComparePreview();
 
-  static const _situations = ['Going through a breakup', 'Dealing with failure', 'Feeling lost'];
+  static const _situations = [
+    'Going through a breakup',
+    'Dealing with failure',
+    'Feeling lost'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -272,29 +283,30 @@ class _ComparePreview extends StatelessWidget {
           const Text(
             'Recent situations',
             style: TextStyle(
-              color:      AppColors.textMuted,
-              fontSize:   11,
+              color: AppColors.textMuted,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: 10),
           ..._situations.map((s) => Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                const Icon(Icons.chevron_right_rounded, color: AppColors.teal, size: 16),
-                const SizedBox(width: 6),
-                Text(
-                  s,
-                  style: const TextStyle(
-                    color:    AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    const Icon(Icons.chevron_right_rounded,
+                        color: AppColors.teal, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      s,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          )),
+              )),
         ],
       ),
     );
@@ -321,13 +333,16 @@ class _AiPreview extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 28, height: 28,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.accent.withValues(alpha: 0.15),
-                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.4)),
                 ),
-                child: const Icon(Icons.psychology_alt_rounded, color: AppColors.accent, size: 14),
+                child: const Icon(Icons.psychology_alt_rounded,
+                    color: AppColors.accent, size: 14),
               ),
               const SizedBox(width: 8),
               const Text(
@@ -346,9 +361,9 @@ class _AiPreview extends StatelessWidget {
             child: const Text(
               '"What unsettles you today? Name it — and then let us examine whether it is truly within your power."',
               style: TextStyle(
-                color:     AppColors.textPrimary,
-                fontSize:  12,
-                height:    1.5,
+                color: AppColors.textPrimary,
+                fontSize: 12,
+                height: 1.5,
                 fontStyle: FontStyle.italic,
               ),
             ),

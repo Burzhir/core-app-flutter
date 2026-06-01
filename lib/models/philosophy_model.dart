@@ -17,16 +17,16 @@ class DailyPhilosophyContent {
 
 /// Full philosophy model — represents one of the 12 core philosophies.
 class PhilosophyModel {
-  final String        id;
-  final String        name;
-  final String        emoji;
-  final List<Color>   gradient;      // Two-color gradient for cards & detail
-  final String        tagline;       // Short one-liner under the name
-  final String        overview;      // One concise paragraph
-  final List<String>  coreBeliefs;  // 3–5 bullet points
-  final List<String>  keyThinkers;  // Notable figures
-  final String        practicalApplication;
-  final String        criticisms;
+  final String id;
+  final String name;
+  final String emoji;
+  final List<Color> gradient; // Two-color gradient for cards & detail
+  final String tagline; // Short one-liner under the name
+  final String overview; // One concise paragraph
+  final List<String> coreBeliefs; // 3–5 bullet points
+  final List<String> keyThinkers; // Notable figures
+  final String practicalApplication;
+  final String criticisms;
   final List<DailyPhilosophyContent> dailyContent; // 7 entries (Mon–Sun)
 
   const PhilosophyModel({

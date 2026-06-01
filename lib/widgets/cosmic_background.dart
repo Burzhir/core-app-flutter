@@ -48,14 +48,15 @@ class _CosmicBackgroundState extends State<CosmicBackground>
 
 class _CosmicPainter extends CustomPainter {
   final double t;
-  final Color  accent1;
-  final Color  accent2;
+  final Color accent1;
+  final Color accent2;
 
   static final _rng = math.Random(7);
-  static late final List<_StarData> _stars =
+  static final List<_StarData> _stars =
       List.generate(150, (_) => _StarData(_rng));
 
-  _CosmicPainter({required this.t, required this.accent1, required this.accent2});
+  _CosmicPainter(
+      {required this.t, required this.accent1, required this.accent2});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -71,8 +72,8 @@ class _CosmicPainter extends CustomPainter {
     );
 
     // Nebula clouds
-    _paintNebula(canvas, size, Alignment(-0.7, -0.6), accent1, 0.06);
-    _paintNebula(canvas, size, Alignment(0.8,  0.7),  accent2, 0.04);
+    _paintNebula(canvas, size, const Alignment(-0.7, -0.6), accent1, 0.06);
+    _paintNebula(canvas, size, const Alignment(0.8, 0.7), accent2, 0.04);
 
     // Stars
     for (final s in _stars) {
@@ -80,7 +81,9 @@ class _CosmicPainter extends CustomPainter {
       canvas.drawCircle(
         Offset(s.x * size.width, s.y * size.height),
         s.r * (0.7 + twinkle * 0.3),
-        Paint()..color = Colors.white.withValues(alpha: s.opacity * (0.3 + twinkle * 0.7)),
+        Paint()
+          ..color =
+              Colors.white.withValues(alpha: s.opacity * (0.3 + twinkle * 0.7)),
       );
     }
 
@@ -99,7 +102,8 @@ class _CosmicPainter extends CustomPainter {
     );
   }
 
-  void _paintNebula(Canvas canvas, Size size, Alignment pos, Color color, double opacity) {
+  void _paintNebula(
+      Canvas canvas, Size size, Alignment pos, Color color, double opacity) {
     final cx = (pos.x * 0.5 + 0.5) * size.width;
     final cy = (pos.y * 0.5 + 0.5) * size.height;
     final radius = size.width * 0.55;
@@ -150,10 +154,10 @@ class _CosmicPainter extends CustomPainter {
 class _StarData {
   final double x, y, r, speed, phase, opacity;
   _StarData(math.Random rng)
-      : x       = rng.nextDouble(),
-        y       = rng.nextDouble(),
-        r       = rng.nextDouble() * 1.4 + 0.2,
-        speed   = rng.nextDouble() * 0.6 + 0.1,
-        phase   = rng.nextDouble() * math.pi * 2,
+      : x = rng.nextDouble(),
+        y = rng.nextDouble(),
+        r = rng.nextDouble() * 1.4 + 0.2,
+        speed = rng.nextDouble() * 0.6 + 0.1,
+        phase = rng.nextDouble() * math.pi * 2,
         opacity = rng.nextDouble() * 0.5 + 0.1;
 }

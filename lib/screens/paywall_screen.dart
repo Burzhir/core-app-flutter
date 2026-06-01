@@ -15,12 +15,12 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
-  Offerings?  _offerings;
-  Package?    _selectedPackage;
-  bool        _loadingOfferings = true;
-  bool        _purchasing       = false;
-  bool        _restoring        = false;
-  String?     _error;
+  Offerings? _offerings;
+  Package? _selectedPackage;
+  bool _loadingOfferings = true;
+  bool _purchasing = false;
+  bool _restoring = false;
+  String? _error;
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final offerings = await RevenueCatService.fetchOfferings();
     if (!mounted) return;
     setState(() {
-      _offerings       = offerings;
+      _offerings = offerings;
       _loadingOfferings = false;
       // Default: pre-select the annual package (best value)
       if (offerings?.current != null) {
@@ -49,7 +49,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final pkg = _selectedPackage;
     if (pkg == null) return;
 
-    setState(() { _purchasing = true; _error = null; });
+    setState(() {
+      _purchasing = true;
+      _error = null;
+    });
 
     final result = await RevenueCatService.purchasePackage(pkg);
 
@@ -62,14 +65,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
       Navigator.pop(context);
       _showSnack('Welcome to CORE Premium!', success: true);
     } else if (result.error != null) {
-      setState(() { _error = result.error; _purchasing = false; });
+      setState(() {
+        _error = result.error;
+        _purchasing = false;
+      });
     } else {
       setState(() => _purchasing = false); // User cancelled — no message
     }
   }
 
   Future<void> _restore() async {
-    setState(() { _restoring = true; _error = null; });
+    setState(() {
+      _restoring = true;
+      _error = null;
+    });
 
     final result = await RevenueCatService.restorePurchases();
 
@@ -82,7 +91,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       _showSnack('Purchases restored!', success: true);
     } else {
       setState(() {
-        _error    = result.error;
+        _error = result.error;
         _restoring = false;
       });
     }
@@ -92,8 +101,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor:
-            success ? AppColors.surface : const Color(0xFFFF3B30),
+        backgroundColor: success ? AppColors.surface : const Color(0xFFFF3B30),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -109,9 +117,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
         children: [
           // Background glow
           Positioned(
-            top: -100, left: -50,
+            top: -100,
+            left: -50,
             child: Container(
-              width: 400, height: 400,
+              width: 400,
+              height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -135,7 +145,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 32, height: 32,
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
                           color: AppColors.surfaceAlt,
                           borderRadius: BorderRadius.circular(16),
@@ -153,7 +164,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         // Trigger chip
                         if (widget.triggerReason != null)
                           Container(
@@ -163,7 +173,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                               color: AppColors.accent.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: AppColors.accent.withValues(alpha: 0.3)),
+                                  color:
+                                      AppColors.accent.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               widget.triggerReason!,
@@ -184,10 +195,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           child: const Text(
                             'Go\nPremium.',
                             style: TextStyle(
-                              color:      Colors.white,
-                              fontSize:   48,
+                              color: Colors.white,
+                              fontSize: 48,
                               fontWeight: FontWeight.w900,
-                              height:     1.1,
+                              height: 1.1,
                               fontFamily: 'Outfit',
                             ),
                           ),
@@ -201,7 +212,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         const Text(
                           'Unlimited access to all philosophies,\nunlimited AI diagnoses, zero limits.',
                           style: TextStyle(
-                            color:  AppColors.textSecondary,
+                            color: AppColors.textSecondary,
                             fontSize: 16,
                             height: 1.6,
                           ),
@@ -211,11 +222,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                         // Feature list
                         ..._features.asMap().entries.map((e) => _FeatureRow(
-                          icon:     e.value.$1,
-                          title:    e.value.$2,
-                          subtitle: e.value.$3,
-                          delay:    300 + e.key * 80,
-                        )),
+                              icon: e.value.$1,
+                              title: e.value.$2,
+                              subtitle: e.value.$3,
+                              delay: 300 + e.key * 80,
+                            )),
 
                         const SizedBox(height: 28),
 
@@ -229,9 +240,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                         setState(() => _selectedPackage = p),
                                   )
                                 : _PricingOptions(
-                                    offering:  _offerings!.current!,
-                                    selected:  _selectedPackage,
-                                    onSelect:  (p) =>
+                                    offering: _offerings!.current!,
+                                    selected: _selectedPackage,
+                                    onSelect: (p) =>
                                         setState(() => _selectedPackage = p),
                                   ),
 
@@ -251,12 +262,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
                         // CTA button
                         _UnlockButton(
-                          loading:   _purchasing,
-                          disabled:  _selectedPackage == null || _loadingOfferings,
-                          onTap:     _purchase,
-                        )
-                            .animate(delay: 800.ms)
-                            .fadeIn(duration: 500.ms),
+                          loading: _purchasing,
+                          disabled:
+                              _selectedPackage == null || _loadingOfferings,
+                          onTap: _purchase,
+                        ).animate(delay: 800.ms).fadeIn(duration: 500.ms),
 
                         const SizedBox(height: 12),
 
@@ -268,7 +278,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                               onTap: _restoring ? null : _restore,
                               child: _restoring
                                   ? const SizedBox(
-                                      width: 14, height: 14,
+                                      width: 14,
+                                      height: 14,
                                       child: CircularProgressIndicator(
                                           strokeWidth: 1.5,
                                           color: AppColors.textMuted),
@@ -276,8 +287,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                   : const Text(
                                       'Restore purchases',
                                       style: TextStyle(
-                                        color:     AppColors.textSecondary,
-                                        fontSize:  12,
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
                                         decoration: TextDecoration.underline,
                                         decorationColor: AppColors.textMuted,
                                       ),
@@ -304,7 +315,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             'Subscription renews automatically until cancelled.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: AppColors.textMuted, fontSize: 10,
+                                color: AppColors.textMuted,
+                                fontSize: 10,
                                 height: 1.5),
                           ),
                         ),
@@ -321,19 +333,27 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   static const List<(String, String, String)> _features = [
-    ('⚡', 'Unlimited AI Diagnoses',  'No daily cap — diagnose as much as you need'),
-    ('📚', 'Full Philosophy Library', 'All 30 isms unlocked with deep insights'),
-    ('🎨', 'Exclusive AI Art',        'Unique generative art for every philosophy'),
-    ('📊', 'Advanced Analytics',      'Track your philosophy patterns over time'),
-    ('🔥', 'Priority AI',             'Faster responses, better AI model access'),
+    (
+      '⚡',
+      'Unlimited AI Diagnoses',
+      'No daily cap — diagnose as much as you need'
+    ),
+    (
+      '📚',
+      'Full Philosophy Library',
+      'All 30 isms unlocked with deep insights'
+    ),
+    ('🎨', 'Exclusive AI Art', 'Unique generative art for every philosophy'),
+    ('📊', 'Advanced Analytics', 'Track your philosophy patterns over time'),
+    ('🔥', 'Priority AI', 'Faster responses, better AI model access'),
   ];
 }
 
 // ── Pricing options (live from RevenueCat) ────────────────────────────────────
 
 class _PricingOptions extends StatelessWidget {
-  final Offering      offering;
-  final Package?      selected;
+  final Offering offering;
+  final Package? selected;
   final ValueChanged<Package?> onSelect;
 
   const _PricingOptions({
@@ -354,16 +374,16 @@ class _PricingOptions extends StatelessWidget {
 
     return Column(
       children: packages.map((pkg) {
-        final isAnnual   = pkg.packageType == PackageType.annual;
+        final isAnnual = pkg.packageType == PackageType.annual;
         final isSelected = selected?.identifier == pkg.identifier;
-        final price      = pkg.storeProduct.priceString;
+        final price = pkg.storeProduct.priceString;
 
         return GestureDetector(
           onTap: () => onSelect(pkg),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            margin:   const EdgeInsets.only(bottom: 12),
-            padding:  const EdgeInsets.all(18),
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: isSelected
                   ? LinearGradient(colors: [
@@ -371,7 +391,7 @@ class _PricingOptions extends StatelessWidget {
                       AppColors.teal.withValues(alpha: 0.08),
                     ])
                   : null,
-              color:        isSelected ? null : AppColors.surface,
+              color: isSelected ? null : AppColors.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: isSelected
@@ -391,10 +411,10 @@ class _PricingOptions extends StatelessWidget {
                           Text(
                             isAnnual ? 'Annual' : 'Monthly',
                             style: TextStyle(
-                              color:      isSelected
+                              color: isSelected
                                   ? AppColors.textPrimary
                                   : AppColors.textSecondary,
-                              fontSize:   15,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'Outfit',
                             ),
@@ -408,14 +428,15 @@ class _PricingOptions extends StatelessWidget {
                                 color: AppColors.gold.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                    color: AppColors.gold.withValues(alpha: 0.4)),
+                                    color:
+                                        AppColors.gold.withValues(alpha: 0.4)),
                               ),
                               child: const Text(
                                 'SAVE 44%',
                                 style: TextStyle(
-                                  color:        AppColors.gold,
-                                  fontSize:     9,
-                                  fontWeight:   FontWeight.w800,
+                                  color: AppColors.gold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -429,7 +450,7 @@ class _PricingOptions extends StatelessWidget {
                             ? 'Full year · billed annually'
                             : 'Billed every month',
                         style: const TextStyle(
-                          color:    AppColors.textMuted,
+                          color: AppColors.textMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -439,10 +460,9 @@ class _PricingOptions extends StatelessWidget {
                 Text(
                   isAnnual ? price : price,
                   style: TextStyle(
-                    color:      isSelected
-                        ? AppColors.accent
-                        : AppColors.textSecondary,
-                    fontSize:   20,
+                    color:
+                        isSelected ? AppColors.accent : AppColors.textSecondary,
+                    fontSize: 20,
                     fontWeight: FontWeight.w800,
                     fontFamily: 'Outfit',
                   ),
@@ -459,7 +479,7 @@ class _PricingOptions extends StatelessWidget {
 // ── Fallback when RevenueCat is not yet configured ────────────────────────────
 
 class _FallbackPricingCard extends StatelessWidget {
-  final Package?      selected;
+  final Package? selected;
   final ValueChanged<Package?> onSelect;
 
   const _FallbackPricingCard({
@@ -483,26 +503,26 @@ class _FallbackPricingCard extends StatelessWidget {
         border: Border.all(
             color: AppColors.accent.withValues(alpha: 0.4), width: 1.5),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'CORE Premium',
             style: TextStyle(
-              color:      AppColors.textPrimary,
-              fontSize:   16,
+              color: AppColors.textPrimary,
+              fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 10),
-          const Row(
+          SizedBox(height: 10),
+          Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 '\$2.99',
                 style: TextStyle(
-                  color:      AppColors.textPrimary,
-                  fontSize:   36,
+                  color: AppColors.textPrimary,
+                  fontSize: 36,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -516,17 +536,17 @@ class _FallbackPricingCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          const Text(
+          SizedBox(height: 6),
+          Text(
             'Or \$19.99/year — save 44%',
             style: TextStyle(
-              color:      AppColors.accent,
-              fontSize:   13,
+              color: AppColors.accent,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Payments coming soon — configure RevenueCat to enable.',
             style: TextStyle(color: AppColors.textMuted, fontSize: 11),
           ),
@@ -542,17 +562,19 @@ class _PricingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(2, (i) => Container(
-        height: 80,
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.border),
-        ),
-      )
-          .animate(onPlay: (c) => c.repeat(reverse: true))
-          .shimmer(duration: 1200.ms, color: AppColors.surfaceGlass)),
+      children: List.generate(
+          2,
+          (i) => Container(
+                height: 80,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.border),
+                ),
+              )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .shimmer(duration: 1200.ms, color: AppColors.surfaceGlass)),
     );
   }
 }
@@ -563,7 +585,7 @@ class _FeatureRow extends StatelessWidget {
   final String icon;
   final String title;
   final String subtitle;
-  final int    delay;
+  final int delay;
 
   const _FeatureRow({
     required this.icon,
@@ -580,7 +602,8 @@ class _FeatureRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: AppColors.accentSoft,
               borderRadius: BorderRadius.circular(12),
@@ -597,16 +620,16 @@ class _FeatureRow extends StatelessWidget {
               children: [
                 Text(title,
                     style: const TextStyle(
-                      color:      AppColors.textPrimary,
-                      fontSize:   14,
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                     )),
                 const SizedBox(height: 2),
                 Text(subtitle,
                     style: const TextStyle(
-                      color:    AppColors.textMuted,
+                      color: AppColors.textMuted,
                       fontSize: 12,
-                      height:   1.4,
+                      height: 1.4,
                     )),
               ],
             ),
@@ -623,8 +646,8 @@ class _FeatureRow extends StatelessWidget {
 }
 
 class _UnlockButton extends StatelessWidget {
-  final bool         loading;
-  final bool         disabled;
+  final bool loading;
+  final bool disabled;
   final VoidCallback onTap;
 
   const _UnlockButton({
@@ -650,27 +673,28 @@ class _UnlockButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color:      AppColors.accent.withValues(alpha: 0.4),
+                color: AppColors.accent.withValues(alpha: 0.4),
                 blurRadius: 24,
-                offset:     const Offset(0, 6),
+                offset: const Offset(0, 6),
               ),
             ],
           ),
           child: Center(
             child: loading
                 ? const SizedBox(
-                    width: 22, height: 22,
+                    width: 22,
+                    height: 22,
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: Colors.white),
                   )
                 : const Text(
                     'UNLOCK PREMIUM',
                     style: TextStyle(
-                      color:       Colors.white,
-                      fontSize:    15,
-                      fontWeight:  FontWeight.w800,
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
                       letterSpacing: 2,
-                      fontFamily:  'Outfit',
+                      fontFamily: 'Outfit',
                     ),
                   ),
           ),

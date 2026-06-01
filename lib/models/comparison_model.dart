@@ -3,9 +3,9 @@ class PhilosophyPerspective {
   final String philosophyId;
   final String philosophyName;
   final String emoji;
-  final String keyInsight;   // One powerful sentence
-  final String perspective;  // 2–3 paragraphs of real guidance
-  final String actionStep;   // Concrete thing to do today
+  final String keyInsight; // One powerful sentence
+  final String perspective; // 2–3 paragraphs of real guidance
+  final String actionStep; // Concrete thing to do today
 
   const PhilosophyPerspective({
     required this.philosophyId,
@@ -20,9 +20,9 @@ class PhilosophyPerspective {
 /// A life situation users can compare across philosophies.
 class ComparisonSituation {
   final String id;
-  final String title;      // "Going through a breakup"
-  final String icon;       // emoji
-  final String prompt;     // Short descriptor shown in comparison screen
+  final String title; // "Going through a breakup"
+  final String icon; // emoji
+  final String prompt; // Short descriptor shown in comparison screen
   final List<PhilosophyPerspective> perspectives;
 
   const ComparisonSituation({

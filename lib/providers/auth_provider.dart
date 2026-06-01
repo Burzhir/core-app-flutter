@@ -8,21 +8,21 @@ import '../services/revenue_cat_service.dart';
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
 class AuthProvider extends ChangeNotifier {
-  final FirebaseAuth      _auth   = FirebaseAuth.instance;
-  final GoogleSignIn      _google = GoogleSignIn();
-  final FirebaseFirestore _db     = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _google = GoogleSignIn();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  AuthStatus _status  = AuthStatus.unknown;
+  AuthStatus _status = AuthStatus.unknown;
   UserModel? _user;
-  String?    _error;
-  bool       _loading = false;
+  String? _error;
+  bool _loading = false;
 
-  AuthStatus get status          => _status;
-  UserModel? get user            => _user;
-  String?    get error           => _error;
-  bool       get loading         => _loading;
-  bool       get isAuthenticated => _status == AuthStatus.authenticated;
-  bool       get isPremium       => _user?.isPremium ?? false;
+  AuthStatus get status => _status;
+  UserModel? get user => _user;
+  String? get error => _error;
+  bool get loading => _loading;
+  bool get isAuthenticated => _status == AuthStatus.authenticated;
+  bool get isPremium => _user?.isPremium ?? false;
 
   AuthProvider() {
     _auth.authStateChanges().listen(_onAuthStateChanged);
@@ -33,7 +33,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _onAuthStateChanged(User? firebaseUser) async {
     if (firebaseUser == null) {
       _status = AuthStatus.unauthenticated;
-      _user   = null;
+      _user = null;
       await RevenueCatService.logoutUser();
     } else {
       await _loadOrCreateUser(firebaseUser);
@@ -51,11 +51,11 @@ class AuthProvider extends ChangeNotifier {
         _user = UserModel.fromMap(doc.data()!, firebaseUser.uid);
       } else {
         final newUser = UserModel(
-          uid:         firebaseUser.uid,
+          uid: firebaseUser.uid,
           displayName: firebaseUser.displayName,
-          email:       firebaseUser.email,
-          photoUrl:    firebaseUser.photoURL,
-          createdAt:   DateTime.now(),
+          email: firebaseUser.email,
+          photoUrl: firebaseUser.photoURL,
+          createdAt: DateTime.now(),
         );
         await _db
             .collection('users')
@@ -72,7 +72,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> signInWithGoogle() async {
     _loading = true;
-    _error   = null;
+    _error = null;
     notifyListeners();
 
     try {
@@ -87,7 +87,7 @@ class AuthProvider extends ChangeNotifier {
       final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
-        idToken:     googleAuth.idToken,
+        idToken: googleAuth.idToken,
       );
 
       await _auth.signInWithCredential(credential);
@@ -95,7 +95,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error   = 'Sign-in failed. Please try again.';
+      _error = 'Sign-in failed. Please try again.';
       _loading = false;
       notifyListeners();
       return false;
@@ -121,7 +121,10 @@ class AuthProvider extends ChangeNotifier {
     if (hasPremium == u.isPremium) return; // Nothing changed
 
     try {
-      await _db.collection('users').doc(u.uid).update({'isPremium': hasPremium});
+      await _db
+          .collection('users')
+          .doc(u.uid)
+          .update({'isPremium': hasPremium});
       _user = u.copyWith(isPremium: hasPremium);
       notifyListeners();
     } catch (e) {
@@ -137,18 +140,19 @@ class AuthProvider extends ChangeNotifier {
     final u = _user;
     if (u == null || u.isPremium) return;
 
-    final today    = _todayStr();
-    final newCount = (u.lastAiMessageDate == today ? u.dailyAiMessagesUsed : 0) + 1;
+    final today = _todayStr();
+    final newCount =
+        (u.lastAiMessageDate == today ? u.dailyAiMessagesUsed : 0) + 1;
 
     final updated = u.copyWith(
       dailyAiMessagesUsed: newCount,
-      lastAiMessageDate:   today,
+      lastAiMessageDate: today,
     );
 
     try {
       await _db.collection('users').doc(u.uid).update({
         'dailyAiMessagesUsed': newCount,
-        'lastAiMessageDate':   today,
+        'lastAiMessageDate': today,
       });
       _user = updated;
       notifyListeners();
@@ -162,9 +166,10 @@ class AuthProvider extends ChangeNotifier {
     final u = _user;
     if (u == null) return 0;
     if (u.isPremium) return 999;
-    final today    = _todayStr();
-    final used     = u.lastAiMessageDate == today ? u.dailyAiMessagesUsed : 0;
-    return (UserModel.freeAiDailyLimit - used).clamp(0, UserModel.freeAiDailyLimit);
+    final today = _todayStr();
+    final used = u.lastAiMessageDate == today ? u.dailyAiMessagesUsed : 0;
+    return (UserModel.freeAiDailyLimit - used)
+        .clamp(0, UserModel.freeAiDailyLimit);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

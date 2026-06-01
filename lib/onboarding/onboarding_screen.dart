@@ -83,9 +83,9 @@ class _WelcomePage extends StatelessWidget {
         child: Column(
           children: [
             const Spacer(flex: 2),
-
             Container(
-              width: 80, height: 80,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const RadialGradient(
@@ -104,7 +104,8 @@ class _WelcomePage extends StatelessWidget {
                 ],
               ),
               child: const Center(
-                child: Text('C',
+                child: Text(
+                  'C',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 36,
@@ -114,12 +115,10 @@ class _WelcomePage extends StatelessWidget {
                 ),
               ),
             ).animate().fadeIn(duration: 600.ms).scale(
-              begin: const Offset(0.8, 0.8),
-              end: const Offset(1.0, 1.0),
-            ),
-
+                  begin: const Offset(0.8, 0.8),
+                  end: const Offset(1.0, 1.0),
+                ),
             const SizedBox(height: 28),
-
             ShaderMask(
               shaderCallback: (b) => const LinearGradient(
                 colors: [Color(0xFFBF5AF2), Color(0xFF64D2FF)],
@@ -135,10 +134,8 @@ class _WelcomePage extends StatelessWidget {
                 ),
               ),
             ).animate(delay: 200.ms).fadeIn(duration: 600.ms),
-
             const SizedBox(height: 8),
-
-            Text(
+            const Text(
               'Forge Yourself',
               style: TextStyle(
                 color: AppColors.textMuted,
@@ -147,9 +144,7 @@ class _WelcomePage extends StatelessWidget {
                 fontFamily: 'Outfit',
               ),
             ).animate(delay: 300.ms).fadeIn(duration: 600.ms),
-
             const Spacer(flex: 2),
-
             const Text(
               'Get guidance from history\'s greatest\nphilosophical traditions.\n\nJournal, reflect, and challenge your\nthinking from multiple perspectives.',
               textAlign: TextAlign.center,
@@ -159,15 +154,12 @@ class _WelcomePage extends StatelessWidget {
                 height: 1.7,
               ),
             ).animate(delay: 500.ms).fadeIn(duration: 700.ms),
-
             const Spacer(flex: 3),
-
             _BigButton(
               label: "Let's begin",
               onTap: onNext,
               delay: 800,
             ),
-
             const SizedBox(height: 20),
             const Text(
               '12 philosophies · AI mentors · Daily practice',
@@ -205,9 +197,7 @@ class _SituationPage extends StatelessWidget {
                 fontFamily: 'Outfit',
               ),
             ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.2, end: 0),
-
             const SizedBox(height: 8),
-
             const Text(
               'Pick what feels most relevant. CORE will show you\nhow different philosophies see your situation.',
               style: TextStyle(
@@ -216,9 +206,7 @@ class _SituationPage extends StatelessWidget {
                 height: 1.5,
               ),
             ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
-
             const SizedBox(height: 28),
-
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -258,9 +246,12 @@ class _SituationPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ).animate(delay: Duration(milliseconds: 300 + i * 60))
-                    .fadeIn(duration: 400.ms)
-                    .scale(begin: const Offset(0.95, 0.95), end: const Offset(1, 1));
+                  )
+                      .animate(delay: Duration(milliseconds: 300 + i * 60))
+                      .fadeIn(duration: 400.ms)
+                      .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1));
                 },
               ),
             ),
@@ -275,7 +266,7 @@ class _SituationPage extends StatelessWidget {
 
 class _PerspectivesPage extends StatelessWidget {
   final ComparisonSituation situation;
-  final VoidCallback         onFinish;
+  final VoidCallback onFinish;
 
   const _PerspectivesPage({
     required this.situation,
@@ -295,7 +286,8 @@ class _PerspectivesPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.accentSoft,
                     borderRadius: BorderRadius.circular(12),
@@ -310,9 +302,7 @@ class _PerspectivesPage extends StatelessWidget {
                     ),
                   ),
                 ).animate().fadeIn(duration: 400.ms),
-
                 const SizedBox(height: 14),
-
                 const Text(
                   'Three perspectives',
                   style: TextStyle(
@@ -322,19 +312,16 @@ class _PerspectivesPage extends StatelessWidget {
                     fontFamily: 'Outfit',
                   ),
                 ).animate(delay: 100.ms).fadeIn(duration: 500.ms),
-
                 const SizedBox(height: 4),
-
                 const Text(
                   'Each philosophy approaches this differently. This is what CORE does.',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  style:
+                      TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -354,8 +341,7 @@ class _PerspectivesPage extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(p.emoji,
-                              style: const TextStyle(fontSize: 20)),
+                          Text(p.emoji, style: const TextStyle(fontSize: 20)),
                           const SizedBox(width: 10),
                           Text(
                             p.philosophyName,
@@ -391,13 +377,13 @@ class _PerspectivesPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                ).animate(delay: Duration(milliseconds: 300 + i * 120))
-                  .fadeIn(duration: 500.ms)
-                  .slideY(begin: 0.15, end: 0);
+                )
+                    .animate(delay: Duration(milliseconds: 300 + i * 120))
+                    .fadeIn(duration: 500.ms)
+                    .slideY(begin: 0.15, end: 0);
               },
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
             child: _BigButton(
@@ -415,9 +401,9 @@ class _PerspectivesPage extends StatelessWidget {
 // ── Shared ────────────────────────────────────────────────────────────────────
 
 class _BigButton extends StatelessWidget {
-  final String    label;
+  final String label;
   final VoidCallback onTap;
-  final int       delay;
+  final int delay;
 
   const _BigButton({
     required this.label,
@@ -439,9 +425,9 @@ class _BigButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color:      AppColors.accent.withValues(alpha: 0.4),
+              color: AppColors.accent.withValues(alpha: 0.4),
               blurRadius: 24,
-              offset:     const Offset(0, 6),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -449,11 +435,11 @@ class _BigButton extends StatelessWidget {
           child: Text(
             label,
             style: const TextStyle(
-              color:         Colors.white,
-              fontSize:      15,
-              fontWeight:    FontWeight.w800,
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
               letterSpacing: 1.5,
-              fontFamily:    'Outfit',
+              fontFamily: 'Outfit',
             ),
           ),
         ),

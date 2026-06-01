@@ -3,8 +3,8 @@ import '../services/ai_service.dart';
 import '../models/user_model.dart';
 
 class ChatMessage {
-  final String  text;
-  final bool    isUser;
+  final String text;
+  final bool isUser;
   final DateTime timestamp;
 
   const ChatMessage({
@@ -16,17 +16,17 @@ class ChatMessage {
 
 class AiChatProvider extends ChangeNotifier {
   // ── State ─────────────────────────────────────────────────────────────────
-  String?               _selectedPhilosophy;
+  String? _selectedPhilosophy;
   final List<ChatMessage> _messages = [];
-  bool                  _isLoading    = false;
-  String?               _error;
+  bool _isLoading = false;
+  String? _error;
 
   // ── Getters ───────────────────────────────────────────────────────────────
-  String?                   get selectedPhilosophy => _selectedPhilosophy;
-  List<ChatMessage>          get messages           => List.unmodifiable(_messages);
-  bool                       get isLoading          => _isLoading;
-  String?                    get error              => _error;
-  bool                       get hasConversation    => _messages.isNotEmpty;
+  String? get selectedPhilosophy => _selectedPhilosophy;
+  List<ChatMessage> get messages => List.unmodifiable(_messages);
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  bool get hasConversation => _messages.isNotEmpty;
 
   // ── Philosophy selection ──────────────────────────────────────────────────
 
@@ -48,7 +48,8 @@ class AiChatProvider extends ChangeNotifier {
     if (philosophy == null || text.trim().isEmpty) return false;
 
     // Check free tier limit
-    if (user != null && !user.isPremium &&
+    if (user != null &&
+        !user.isPremium &&
         user.dailyAiMessagesUsed >= UserModel.freeAiDailyLimit) {
       _error =
           'You have used your ${UserModel.freeAiDailyLimit} free messages today. '
@@ -59,17 +60,17 @@ class AiChatProvider extends ChangeNotifier {
 
     // Add user message
     _messages.add(ChatMessage(
-      text:      text.trim(),
-      isUser:    true,
+      text: text.trim(),
+      isUser: true,
       timestamp: DateTime.now(),
     ));
     _isLoading = true;
-    _error     = null;
+    _error = null;
     notifyListeners();
 
     // Build conversation history (last 8 exchanges = 16 messages max)
     final history = <Map<String, String>>[];
-    final start   = (_messages.length - 1 - 16).clamp(0, _messages.length - 1);
+    final start = (_messages.length - 1 - 16).clamp(0, _messages.length - 1);
     for (var i = start; i < _messages.length - 1; i++) {
       final m = _messages[i];
       history.add({'role': m.isUser ? 'user' : 'assistant', 'content': m.text});
@@ -77,14 +78,14 @@ class AiChatProvider extends ChangeNotifier {
 
     // Call AI
     final response = await AiService.chat(
-      philosophyName:      philosophy,
-      userMessage:          text.trim(),
-      conversationHistory:  history,
+      philosophyName: philosophy,
+      userMessage: text.trim(),
+      conversationHistory: history,
     );
 
     _messages.add(ChatMessage(
-      text:      response,
-      isUser:    false,
+      text: response,
+      isUser: false,
       timestamp: DateTime.now(),
     ));
     _isLoading = false;
