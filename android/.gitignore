@@ -12,19 +12,3 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
-
-# Environment / secret files
-.env
-*.env
-.env.*
-
-# macOS
-.DS_Store
-
-# IDE / editor
-.vscode/
-.idea/
-
-# Flutter build artifacts (already partially covered, but good to be explicit)
-build/
-.dart_tool/
