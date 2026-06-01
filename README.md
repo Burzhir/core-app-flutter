@@ -16,5 +16,5 @@ It connects to a Flask AI API to give you actionable wisdom — no therapy, no h
 - **Framework**: Flutter (Dart)
 - **State Management**: Provider + ChangeNotifier
 - **Local Persistence**: SharedPreferences (journal, streaks, history)
-- **API**: Custom Flask backend (Groq AI + keyword fallback) hosted on Render
+- **API**: Custom Flask backend (OpenRouter AI + keyword fallback) hosted on Render
 - **Styling**: Dark theme, custom gradients, animated transitions
